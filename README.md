@@ -1,4 +1,4 @@
-# battleships update 3
+# battleships update
 
 ## Build Setup
 
