@@ -1,0 +1,36 @@
+/* Global variables */
+:root {
+  --bs-bluehover: #2363b6;
+  --bs-blue: rgb(0, 74, 173);
+  --bs-lightblue: #32a5d3;
+  --bs-extralightgrey: rgb(248, 246, 246);
+  --bs-lightgrey: rgb(231, 231, 231);
+  --bs-mediumgrey: rgb(122, 122, 122);
+  --bs-darkgrey: rgb(74, 74, 74);
+  --bs-orange: #ff914d;
+  --bs-red: #ad0606;
+
+  --bs-font-weight: 400;
+  --bs-font-family: 'Work Sans', sans-serif;
+  --bs-font-size-small: 0.8em;
+  --bs-font-size-normal: 0.875rem;
+  --bs-font-size-medium: 1.2em;
+  --bs-font-size-large: 2.5em;
+  --bs-font-size-extra-large: 3.0em;
+}
+
+body {
+  font-family: var(--bs-font-family)
+}
+
+h1 {
+  color: white;
+  text-align: center;
+  font-size: var(--bs-font-size-large);
+}
+
+h2 {
+  color: white;
+  text-align: center;
+  font-size: var(--bs-font-size-medium);
+}
