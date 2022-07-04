@@ -57,7 +57,7 @@ export default {
     }
   },
   mounted () {
-    this.pageTitle = this.$route.name
+    this.pageTitle = convertPageTitle(this.$route.name)
   }
 }
 </script>

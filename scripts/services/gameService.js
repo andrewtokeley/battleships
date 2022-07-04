@@ -6,7 +6,6 @@ import { db } from './firebase'
 const COLLECTION_ID = 'games'
 
 export const getGameData = async function (id) {
-  console.log('1.1')
   const ref = doc(db, COLLECTION_ID, id).withConverter(GameDataConverter)
   const docSnap = await getDoc(ref)
   if (docSnap.exists()) {
@@ -58,11 +57,13 @@ export const addOrUpdateGameData = async function (gameData) {
 }
 
 export const uniqueGameCode = function () {
-  const letters = Array(26).fill().map((element, index) => String.fromCharCode('A'.charCodeAt(0) + index))
-  // get random sequence
-  let code = ''
-  for (let i = 0; i < 5; i++) {
-    code += letters[Math.floor(Math.random() * letters.length)]
-  }
-  return code
+  return new Promise(function (resolve, reject) {
+    const letters = Array(26).fill().map((element, index) => String.fromCharCode('A'.charCodeAt(0) + index))
+    // get random sequence
+    let code = ''
+    for (let i = 0; i < 5; i++) {
+      code += letters[Math.floor(Math.random() * letters.length)]
+    }
+    resolve(code)
+  })
 }

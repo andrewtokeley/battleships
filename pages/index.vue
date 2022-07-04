@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="button-group">
-      <ButtonLink :disabled="!gameId" :to="joinUrl">
+      <ButtonLink :to="newGameUrl">
         PLAY
       </ButtonLink>
-      <ButtonLink :disabled="!gameId" to="/join">
+      <ButtonLink to="/join">
         JOIN
       </ButtonLink>
     </div>
@@ -14,8 +14,8 @@
 <script>
 
 import ButtonLink from '../components/ButtonLink.vue'
-import { uniqueGameCode } from '../scripts/services/gameService'
 import { useUserStore } from '../store/userStore'
+import { uniqueGameCode } from '../scripts/services/gameService'
 
 export default {
   name: 'IndexPage',
@@ -31,17 +31,16 @@ export default {
   },
   data () {
     return {
-      gameId: null
+      newGameId: ''
     }
   },
   computed: {
-    joinUrl () {
-      return '/join/' + this.gameId
+    newGameUrl () {
+      return `/join/${this.newGameId}?new=true`
     }
   },
-  mounted () {
-    this.$emit('pageTitleChanged', 'BATTLESHIPS')
-    this.gameId = uniqueGameCode()
+  async mounted () {
+    this.newGameId = await uniqueGameCode()
   }
 }
 </script>
