@@ -1,17 +1,27 @@
 <template>
   <div>
     <div class="join-wrapper">
-      <h1>
+      <div v-if="!gameCode && !isNew" class="input__gameCode">
+        <base-text-input v-model.trim="gameCode" :options="{ placeholder: 'Game Code' }" />
+      </div>
+      <h1 v-else>
         {{ gameCode }}
-        <div class="copy-icon material-icons" @click="copyJoinUrlToClipboard">
+        <div v-if="isNew" class="copy-icon material-icons" @click="copyJoinUrlToClipboard">
           content_copy
         </div>
       </h1>
-      <p>copy & share with a friend to play</p>
+      <p v-if="isNew">
+        copy & share with a friend to play and
+      </p>
+
+      <p>
+        enter your battle name
+      </p>
+      <div class="form">
+        <base-text-input v-model.trim="userName" :options="{ placeholder: 'Your Name' }" />
+      </div>
     </div>
-    <div class="form">
-      <base-text-input v-model.trim="userName" :options="{ borderless: true, placeholder: 'Your Name' }" />
-    </div>
+
     <div class="button-group">
       <button-link :disabled="userName.length < 3" @click.native="handleJoin">
         LET'S GO...
@@ -29,7 +39,6 @@ import { GameData } from '../../scripts/dataEntities/gameData'
 import { useUserStore } from '../../store/userStore'
 import { addOrUpdateGameData } from '../../scripts/services/gameService'
 import { copyTextToClipboard } from '../../scripts/copyToClipboard'
-
 export default {
   name: 'JoinBattle',
   components: {
@@ -45,13 +54,17 @@ export default {
   data () {
     return {
       gameCode: '',
-      userName: ''
+      userName: '',
+      isNew: false
     }
   },
   async mounted () {
     this.gameCode = this.$route.params.slug
+    if (this.$route.query.new) {
+      this.isNew = true
+    }
 
-    // find out whether you are logged in with a player name
+    // get the user's name if they've been here before
     const player = await getPlayerData(this.store.user.uid)
     if (player) {
       this.userName = player.name
@@ -74,7 +87,7 @@ export default {
       }
     },
     copyJoinUrlToClipboard () {
-      const url = window.location.href
+      const url = window.location.origin + window.location.pathname
       copyTextToClipboard(url)
     }
   }
@@ -84,7 +97,7 @@ export default {
 <style scoped>
 
 .form {
-  margin-top: 100px;
+  margin-top: 20px;
   width: 100%;
   display:flex;
   align-items: center;
