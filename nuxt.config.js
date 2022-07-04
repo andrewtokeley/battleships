@@ -44,6 +44,10 @@ export default {
   build: {
   },
 
+  rules: {
+    'no-console': 'off'
+  },
+
   env: {
     appTitle: process.env.appTile || 'Battleships - DEV',
     apiKey: process.env.apiKey || 'AIzaSyB74_0nXLcHxDc8-fMjrcd-JxDjhS-cXMQ',

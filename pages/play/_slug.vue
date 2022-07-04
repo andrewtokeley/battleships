@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h1>PLAY</h1>
-    <h2>{{ userId }}</h2>
     <battle-field
       v-if="viewModel.board"
       v-slot="slotparams"

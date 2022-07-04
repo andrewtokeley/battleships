@@ -1,12 +1,17 @@
 <template>
-  <div class="container">
-    <loading-spinner v-if="!store.user.uid" :size="50" :border-size="7" message="loading..." />
-    <span
-      v-if="canClose"
-      class="close-icon material-icons"
-      @click="$router.go(-1)"
-    >close</span>
-    <Nuxt v-if="store.user.uid" />
+  <div class="global-container">
+    <div class="container">
+      <loading-spinner v-if="!store.user.uid" :size="50" :border-size="7" message="loading..." />
+      <div v-else>
+        <div :style="{visibility: canClose ? 'visible' : 'hidden'}" class="close-icon material-icons" @click="$router.go(-1)">
+          close
+        </div>
+        <h1 class="page-heading">
+          {{ pageTitle }}
+        </h1>
+        <Nuxt v-if="store.user.uid" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -19,6 +24,7 @@ import '../scripts/services/auth'
 
 // once logged in the store will be updated
 import { useUserStore } from '../store/userStore'
+import convertPageTitle from '../scripts/pageTitle'
 
 export default {
   name: 'Default',
@@ -33,7 +39,8 @@ export default {
   },
   data () {
     return {
-      canClose: false
+      canClose: false,
+      pageTitle: ''
     }
   },
   head: {
@@ -44,34 +51,58 @@ export default {
   },
   watch: {
     $route () {
+      console.log('route changed, name=' + this.$route.name)
       this.canClose = window.history.length !== 0 && this.$router.history.current.fullPath !== '/'
+      this.pageTitle = convertPageTitle(this.$route.name)
     }
+  },
+  mounted () {
+    this.pageTitle = this.$route.name
   }
 }
 </script>
 
 <style>
 html {
-  background: url(assets/battleships-cover.jpeg) no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
-    background-size: cover;
-  }
+  background-size: cover;
+  margin: 0px;
+}
 </style>
 
 <style scoped>
 
+.global-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .container {
-  margin-top: 90px
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 800px;
+  height: 100%;
+  background: url(assets/battleships-cover.jpeg) no-repeat center center fixed;
 }
 
 .close-icon {
-  position: absolute;
-  top:10px;
-  right:10px;
+  float:right;
+  margin:20px;
   color: white;
   font-size: var(--bs-font-size-large);
+  cursor:pointer;
 }
 
+@media only screen and (max-width 600px) {
+  .container {
+    max-width: none;
+  }
+}
 </style>

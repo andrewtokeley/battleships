@@ -1,9 +1,9 @@
 <template>
   <NuxtLink
-    :disabled="disabled"
     :to="to"
     class="base-button"
     :class="{
+      'base-button--disabled' : disabled,
       'base-button--danger': isDestructive,
       'base-button--secondary': isSecondary,
       'base-button--spinning': showSpinner,
@@ -65,7 +65,7 @@ export default {
   background: var(--bs-blue);
   color: white;
   /* height: 40px; */
-  width: 100px;
+  min-width: 100px;
   vertical-align: middle;
   transition: background 400ms;
 }
@@ -77,12 +77,10 @@ export default {
 .base-button:hover {
   cursor: pointer;
 }
-
-.base-button:disabled {
-  cursor: default;
-  background: white;
-  color: var(--ish-mediumgrey);
-  border: 1px solid var(--bs-lightgrey);
+.base-button--disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  color: var(--bs-lightblue);
 }
 
 /* TRANSPARENT */

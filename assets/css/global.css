@@ -29,6 +29,11 @@ h1 {
   font-size: var(--bs-font-size-large);
 }
 
+h1.page-heading {
+  /* ignore top-right close icon */
+  clear: right;
+}
+
 h2 {
   color: white;
   text-align: center;

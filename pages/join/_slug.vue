@@ -1,16 +1,20 @@
 <template>
   <div>
-    <h1>Join The Game</h1>
-    <h2>{{ gameCode }}</h2>
+    <div class="join-wrapper">
+      <h1>
+        {{ gameCode }}
+        <div class="copy-icon material-icons" @click="copyJoinUrlToClipboard">
+          content_copy
+        </div>
+      </h1>
+      <p>copy & share with a friend to play</p>
+    </div>
     <div class="form">
-      <base-text-input v-model.trim="userName" :options="{ placeholder: 'Your Name' }" />
+      <base-text-input v-model.trim="userName" :options="{ borderless: true, placeholder: 'Your Name' }" />
     </div>
     <div class="button-group">
-      <button-link @click.native="handleJoin">
-        JOIN
-      </button-link>
-      <button-link to="/">
-        CANCEL
+      <button-link :disabled="userName.length < 3" @click.native="handleJoin">
+        LET'S GO...
       </button-link>
     </div>
   </div>
@@ -24,6 +28,7 @@ import { PlayerData } from '../../scripts/dataEntities/playerData'
 import { GameData } from '../../scripts/dataEntities/gameData'
 import { useUserStore } from '../../store/userStore'
 import { addOrUpdateGameData } from '../../scripts/services/gameService'
+import { copyTextToClipboard } from '../../scripts/copyToClipboard'
 
 export default {
   name: 'JoinBattle',
@@ -44,7 +49,6 @@ export default {
     }
   },
   async mounted () {
-    console.log('Mounted Join')
     this.gameCode = this.$route.params.slug
 
     // find out whether you are logged in with a player name
@@ -68,6 +72,10 @@ export default {
           this.$router.push(`/play/${this.gameCode}`)
         }
       }
+    },
+    copyJoinUrlToClipboard () {
+      const url = window.location.href
+      copyTextToClipboard(url)
     }
   }
 }
@@ -82,8 +90,9 @@ export default {
   align-items: center;
   flex-direction: column;
 }
+
 .button-group {
-  position: fixed;
+  position: absolute;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -94,4 +103,25 @@ export default {
   margin-bottom: 80px;
 }
 
+.join-wrapper {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.join-wrapper h1 {
+  margin-bottom: 0px;
+}
+.join-wrapper p {
+  color: white;
+  width: 30%;
+  text-align: center;
+  font-size: var(--bs-font-size-medium);
+}
+.join-wrapper .copy-icon {
+  color:white;
+  position: relative;
+  cursor:pointer;
+}
 </style>

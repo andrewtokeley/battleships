@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>BATTLESHIPS</h1>
     <div class="button-group">
       <ButtonLink :disabled="!gameId" :to="joinUrl">
         PLAY
@@ -23,6 +22,7 @@ export default {
   components: {
     ButtonLink
   },
+  emits: ['pageTitleChanged'],
   setup () {
     const store = useUserStore()
     return {
@@ -40,6 +40,7 @@ export default {
     }
   },
   mounted () {
+    this.$emit('pageTitleChanged', 'BATTLESHIPS')
     this.gameId = uniqueGameCode()
   }
 }
@@ -48,7 +49,7 @@ export default {
 <style scoped>
 
 .button-group {
-  position:fixed;
+  position:absolute;
   display:flex;
   flex-direction: row;
   align-items: center;

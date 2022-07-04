@@ -39,11 +39,5 @@
     "eslint-plugin-vue": "^8.2.0",
     "jest": "^27.4.4",
     "vue-jest": "^3.0.4"
-  },
-  "eslintConfig": {
-    "rules": {
-      "require-default-prop": "off",
-      "no-console": "off"
-    }
   }
 }

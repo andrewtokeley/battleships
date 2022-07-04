@@ -1,9 +1,5 @@
 <template>
   <div>
-    <h1>BATTLESHIPS</h1>
-    <span class="close material-icons">
-      close
-    </span>
     <div class="code-container">
       <div class="codeGroup">
         <template v-for="(char, index) in gameCodeCharacters">
@@ -91,7 +87,7 @@ export default {
 }
 
 .button-group {
-  position: fixed;
+  position: absolute;
   display: flex;
   flex-direction: row;
   align-items: center;
