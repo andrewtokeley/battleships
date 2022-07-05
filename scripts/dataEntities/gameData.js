@@ -22,6 +22,38 @@ class GameData {
     this.player1 = config.player1
     this.player2 = config.player2
   }
+
+  /**
+   * Returns whether one of the two players is the same as the player supplied.
+   *
+   * @param {*} playerId
+   * @returns
+   */
+  playerExists (playerId) {
+    return this.player1 === playerId || this.player2 === playerId
+  }
+
+  /**
+   * Adds a new player to the game, if possible. If there are already 2 players in the game the function returns false, otherwise true
+   * @param {*} playerId
+   */
+  addPlayer (playerId) {
+    // can't add someone twice
+    if ([this.player1, this.player2].includes(playerId)) {
+      return false
+    }
+
+    if (this.player1 == null) {
+      this.player1 = playerId
+      return true
+    } else if (this.player2 == null) {
+      this.player2 = playerId
+      return true
+    } else {
+      // No room for another player
+      return false
+    }
+  }
 }
 
 //

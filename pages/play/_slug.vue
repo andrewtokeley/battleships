@@ -1,5 +1,14 @@
 <template>
   <div>
+    <div class="messages">
+      <h2>
+        {{ gameId }}
+        <icon>content_copy</icon>
+      </h2>
+      <p v-if="settingUp">
+        Position your battleships
+      </p>
+    </div>
     <battle-field
       v-if="viewModel.board"
       v-slot="slotparams"
@@ -29,6 +38,9 @@
         :hit="missile.hit"
       />
     </battle-field>
+    <modal-dialog v-if="showModal" @close="showModal = false">
+      {{ modalMessage }}
+    </modal-dialog>
   </div>
 </template>
 
@@ -44,10 +56,12 @@ import { PlayGameInteractor } from '../../scripts/interators/playGameInteractor'
 
 // Store
 import { useUserStore } from '../../store/userStore'
+import ModalDialog from '../../components/ModalDialog.vue'
+import Icon from '../../components/Icon.vue'
 
 export default {
   name: 'PlayGame',
-  components: { BattleField, MissilePeg, BattleShip },
+  components: { BattleField, MissilePeg, BattleShip, ModalDialog, Icon },
   setup () {
     const store = useUserStore()
     return {
@@ -64,31 +78,47 @@ export default {
       redrawShip: [],
       redrawShipAll: 0,
       cursor: 'default',
-      isValid: true
+      isValid: true,
+      showModal: false,
+      modalMessage: '',
+      settingUp: true
+
     }
   },
   computed: {
     gameId () {
-      return this.$route.params.slug
+      const code = this.$route.params.slug
+      if (code) {
+        return code.toUpperCase()
+      }
+      return ''
     },
     userId () {
       return this.store.user.uid
     }
   },
-  mounted () {
-    // Get the ViewModel this component needs
+  async mounted () {
+    const vm = this
+    // Get the ViewModel this component needs to render
     this.interactor = new PlayGameInteractor()
 
-    const vm = this
-    this.interactor.getGame(this.gameId, this.userId)
-      .then(function (result) {
+    // the will create a new game if none exist with the code
+    this.game = await this.interactor.getGame(this.gameId)
+    if (!this.game) {
+      this.modalMessage = 'Game does not exist'
+      this.showModal = true
+      return
+    }
+    // make sure the current user's id is set against the game
+    this.interactor.addPlayerToGame(this.gameId, this.userId).then(() => {
+      vm.interactor.getGameViewModel(this.gameId, this.userId).then((result) => {
         vm.viewModel = result
-        vm.viewModel.board.battleships.forEach((b) => {
-          vm.redrawBattleship(b)
-        })
-      }).catch(function (e) {
-        console.error(e)
+        vm.redraw()
       })
+    }).catch((error) => {
+      // edge case, probably game full or game doesn't exist
+      console.error(error)
+    })
   },
   methods: {
 
@@ -99,6 +129,9 @@ export default {
       }
     },
     redraw () {
+      if (this.redrawShip.length !== this.viewModel.board.battleships.length) {
+        this.redrawShip = this.viewModel.board.battleships.map(() => 0)
+      }
       this.redrawBattlefield = Math.random()
       this.redrawShip = this.redrawShip.map(r => Math.random())
 
@@ -117,7 +150,7 @@ export default {
           if (clickedBattleship.cellForRotate.row === gridRef.row && clickedBattleship.cellForRotate.column === gridRef.column) {
             console.log('You Rotated The Selected Battleship')
             this.selectedBattleship.rotate()
-            // this.redraw()
+            this.redraw()
           }
           // return
         } else if (clickedBattleship != null) {
@@ -184,3 +217,16 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  color:white;
+  width: 100%;
+  height: 200px;
+}
+</style>

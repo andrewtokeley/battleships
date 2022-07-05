@@ -60,14 +60,18 @@ export default {
     attachEventHandlers () {
       const canvas = this.$refs.canvas
       const vm = this
+
+      document.ontouchmove = function (e) {
+        e.preventDefault()
+      }
       const selectEvents = ['mouseup', 'touchend']
-      selectEvents.forEach(e => canvas.addEventListener(e, vm.handleMouseUp, false))
+      selectEvents.forEach(e => canvas.addEventListener(e, vm.handleMouseUp, { passive: false }))
 
       const dragStartEvents = ['mousedown', 'touchstart']
-      dragStartEvents.forEach(e => canvas.addEventListener(e, vm.handleMouseDown, false))
+      dragStartEvents.forEach(e => canvas.addEventListener(e, vm.handleMouseDown, { passive: false }))
 
       const dragEvents = ['mousemove', 'touchmove']
-      dragEvents.forEach(e => canvas.addEventListener(e, vm.handleMove, false))
+      dragEvents.forEach(e => canvas.addEventListener(e, vm.handleMove, { passive: false }))
     },
 
     singleEvent (e) {
@@ -87,6 +91,8 @@ export default {
     },
 
     handleMouseUp (evt) {
+      evt.preventDefault()
+      console.log('MOUSE UP')
       // always stop dragging if we're here
       this.dragStarted = false
 
@@ -104,6 +110,8 @@ export default {
     },
 
     handleMouseDown (evt) {
+      evt.preventDefault()
+      console.log('MOUSE DOWN')
       this.dragStarted = true
 
       const e = this.singleEvent(evt)
@@ -116,12 +124,13 @@ export default {
      * Raises drag event when dragging moves across a cell boundary
      */
     handleMove (evt) {
+      evt.preventDefault()
+
+      console.log('MOUSE DRAG')
       // Unless you've just pressed MouseDown, we don't care about moving the mouse
       if (!this.dragStarted) {
         return
       }
-
-      this.dragging = true
 
       // some events will come from touch events, we only care about the first event (finger)
       const e = this.singleEvent(evt)
@@ -129,6 +138,7 @@ export default {
       const gridRef = this.gridRef({ x: e.clientX, y: e.clientY })
 
       if (gridRef.row !== this.previousSelectedCell.row || gridRef.column !== this.previousSelectedCell.column) {
+        this.dragging = true
         this.$emit('drag', {
           from: this.previousSelectedCell,
           to: gridRef
@@ -181,6 +191,7 @@ export default {
   display:flex;
   flex-direction: row;
   justify-content: center;
+  touch-action: none;
 }
 
 .battlefield {

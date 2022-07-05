@@ -11,6 +11,7 @@ export const getBattleships = async function (gameId, userId) {
     where('gameId', '==', gameId),
     where('playerId', '==', userId))
   try {
+    console.log('TTTT')
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
       result.push(doc.data())
@@ -18,7 +19,7 @@ export const getBattleships = async function (gameId, userId) {
     return result
   } catch (e) {
     console.error(e)
-    return null
+    return []
   }
 }
 
@@ -35,22 +36,23 @@ export const addOrUpdateBattleshipData = async function (battleshipData) {
 }
 
 /**
- * Adds the initial battleships to the user' board
- * @param {*} gameId
- * @param {*} userId
+ * Returns the default start battleships
+ *
+ * @param {*} gameData
+ * @param {*} playerId
  * @returns
  */
-export const addDefaultBattleships = function (gameId, userId) {
-  return new Promise(function (resolve, reject) {
-    try {
-      addOrUpdateBattleshipData(new BattleshipData({ location: { row: 2, column: 2 }, length: 5, vertical: false, gameId, playerId: userId }))
-      addOrUpdateBattleshipData(new BattleshipData({ location: { row: 4, column: 2 }, length: 4, vertical: false, gameId, playerId: userId }))
-      addOrUpdateBattleshipData(new BattleshipData({ location: { row: 6, column: 2 }, length: 3, vertical: false, gameId, playerId: userId }))
-      addOrUpdateBattleshipData(new BattleshipData({ location: { row: 6, column: 6 }, length: 3, vertical: false, gameId, playerId: userId }))
-      addOrUpdateBattleshipData(new BattleshipData({ location: { row: 8, column: 2 }, length: 2, vertical: false, gameId, playerId: userId }))
-      resolve(true)
-    } catch (e) {
-      reject(e)
-    }
-  })
+export const getDefaultBattleshipsForPlayer = function (gameData, playerId) {
+  // Check this player is part of the game
+  if (gameData.player1 === playerId || gameData.player2 === playerId) {
+    return [
+      new BattleshipData({ location: { row: 2, column: 2 }, length: 5, vertical: false, gameId: gameData.id, playerId }),
+      new BattleshipData({ location: { row: 4, column: 2 }, length: 4, vertical: false, gameId: gameData.id, playerId }),
+      new BattleshipData({ location: { row: 6, column: 2 }, length: 3, vertical: false, gameId: gameData.id, playerId }),
+      new BattleshipData({ location: { row: 6, column: 6 }, length: 3, vertical: false, gameId: gameData.id, playerId }),
+      new BattleshipData({ location: { row: 8, column: 2 }, length: 2, vertical: false, gameId: gameData.id, playerId })
+    ]
+  } else {
+    return []
+  }
 }

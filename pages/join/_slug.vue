@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="join-wrapper">
-      <div v-if="!gameCode && !isNew" class="input__gameCode">
+      <div v-if="!isNew" class="input__gameCode">
         <base-text-input v-model.trim="gameCode" :options="{ placeholder: 'Game Code' }" />
       </div>
       <h1 v-else>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="button-group">
-      <button-link :disabled="userName.length < 3" @click.native="handleJoin">
+      <button-link :disabled="userName.length < 3" :to="`/play/${gameCode}`">
         LET'S GO...
       </button-link>
     </div>

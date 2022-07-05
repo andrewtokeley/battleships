@@ -1,12 +1,18 @@
 <template>
   <div class="global-container">
     <div class="container">
-      <loading-spinner v-if="!store.user.uid" :size="50" :border-size="7" message="loading..." />
+      <loading-spinner
+        v-if="!store.user.uid"
+        class="loading-spinner"
+        :size="50"
+        :border-size="7"
+        message="loading..."
+      />
       <div v-else>
-        <div :style="{visibility: canClose ? 'visible' : 'hidden'}" class="close-icon material-icons" @click="$router.go(-1)">
+        <div :style="{visibility: canClose ? 'visible' : 'hidden'}" class="close-icon material-icons" @click="handleBackNav">
           close
         </div>
-        <h1 class="page-heading">
+        <h1 :style="{visibility: pageTitle ? 'visible' : 'hidden'}" class="page-heading">
           {{ pageTitle }}
         </h1>
         <Nuxt v-if="store.user.uid" />
@@ -27,7 +33,7 @@ import { useUserStore } from '../store/userStore'
 import convertPageTitle from '../scripts/pageTitle'
 
 export default {
-  name: 'Default',
+  name: 'DefaultLayout',
   components: {
     LoadingSpinner
   },
@@ -51,13 +57,20 @@ export default {
   },
   watch: {
     $route () {
-      console.log('route changed, name=' + this.$route.name)
-      this.canClose = window.history.length !== 0 && this.$router.history.current.fullPath !== '/'
-      this.pageTitle = convertPageTitle(this.$route.name)
+      this.handleRouteChanged()
     }
   },
   mounted () {
-    this.pageTitle = convertPageTitle(this.$route.name)
+    this.handleRouteChanged()
+  },
+  methods: {
+    handleRouteChanged () {
+      this.canClose = window.history.length !== 0 && this.$router.history.current.fullPath !== '/'
+      this.pageTitle = convertPageTitle(this.$route.name)
+    },
+    handleBackNav () {
+      this.$router.go(-1)
+    }
   }
 }
 </script>
@@ -88,7 +101,7 @@ html {
   margin-right: auto;
   margin-left: auto;
   max-width: 800px;
-  height: 100%;
+  height: 80%;
   background: url(assets/battleships-cover.jpeg) no-repeat center center fixed;
 }
 
@@ -98,6 +111,9 @@ html {
   color: white;
   font-size: var(--bs-font-size-large);
   cursor:pointer;
+}
+.loading-spinner {
+  margin-top: 100px;
 }
 
 @media only screen and (max-width 600px) {

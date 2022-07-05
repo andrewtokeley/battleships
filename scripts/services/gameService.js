@@ -5,6 +5,11 @@ import { db } from './firebase'
 
 const COLLECTION_ID = 'games'
 
+/**
+ * Resolves with the GameData associated with the gameId. If no game exists the method will still resolve but with null.
+ * @param {*} id
+ * @returns
+ */
 export const getGameData = async function (id) {
   const ref = doc(db, COLLECTION_ID, id).withConverter(GameDataConverter)
   const docSnap = await getDoc(ref)
@@ -46,7 +51,7 @@ const updateGame = async function (gameData) {
 }
 
 /**
- * Adds or updates a game to the data store
+ * Adds or updates a game to the data store. If the game record doesn't exist it will be created.
  *
  * @param {GameData} gameData
  * @returns
