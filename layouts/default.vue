@@ -116,7 +116,7 @@ html {
   margin-top: 100px;
 }
 
-@media only screen and (max-width 600px) {
+@media only screen and (max-width: 600px) {
   .container {
     max-width: none;
   }

@@ -3,6 +3,7 @@ import { Board } from '../board'
 import { getDefaultBattleshipsForPlayer, getBattleships } from '../services/battleshipService'
 import { getGameData, addOrUpdateGameData } from '../services/gameService'
 import { Battleship } from '../../scripts/battleShip'
+import { GameData } from '../dataEntities/gameData'
 
 // import { battleshipAt, rotateBattleship, moveBattleship } from '../services/battleshipService'
 
@@ -14,14 +15,26 @@ export class PlayGameInteractor {
     this.selectedBattleship = null
   }
 
+  async createGame (gameData) {
+    console.log('createGame')
+    const result = await addOrUpdateGameData(gameData)
+    return result
+  }
+
   /**
-   * Returns the GameData instance for the game. If there is no game in the store, returns null.
+   * Returns the GameData instance for the game. If there is no game in the store, one is created
    *
    * @param {*} gameId
    * @returns
    */
   async getGame (gameId) {
-    const gameData = await getGameData(gameId)
+    let gameData = await getGameData(gameId)
+    if (!gameData) {
+      gameData = await this.createGame(new GameData({
+        id: gameId,
+        boardSize: 10
+      }))
+    }
     return gameData
   }
 
@@ -38,7 +51,7 @@ export class PlayGameInteractor {
       getGameData(gameId).then((gameData) => {
         if (!gameData) {
           // Game doesn't exist
-          reject(Error('Game does not exist'))
+          reject(Error(`Game (${gameId}) does not exist`))
         } else if (gameData.playerExists(playerId)) {
           // Player already added to game, all good
           resolve(gameData)
@@ -51,7 +64,7 @@ export class PlayGameInteractor {
             })
           } else {
             // Game is full
-            reject(Error('Game already has two players'))
+            reject(Error(`Game (${gameId}) already has two players`))
           }
         }
       })
@@ -61,11 +74,11 @@ export class PlayGameInteractor {
   /**
   * Resolves with a fully populated GameViewMode, that includes the current user's default start battleships.
   */
-  async getGameViewModel (id, userId) {
-    const [gameData, battleshipsData] = await Promise.all([getGameData(id), getBattleships(id, userId)])
+  async getGameViewModel (gameId, userId) {
+    const [gameData, battleshipsData] = await Promise.all([getGameData(gameId), getBattleships(gameId, userId)])
 
     if (!gameData) {
-      return null
+      throw (new Error(`Game (${gameId}) does not exist`))
     }
 
     let battleships = []

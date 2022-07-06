@@ -97,31 +97,32 @@ export default {
       return this.store.user.uid
     }
   },
-  async mounted () {
+  mounted () {
     const vm = this
     // Get the ViewModel this component needs to render
     this.interactor = new PlayGameInteractor()
 
-    // the will create a new game if none exist with the code
-    this.game = await this.interactor.getGame(this.gameId)
-    if (!this.game) {
-      this.modalMessage = 'Game does not exist'
-      this.showModal = true
-      return
-    }
     // make sure the current user's id is set against the game
-    this.interactor.addPlayerToGame(this.gameId, this.userId).then(() => {
-      vm.interactor.getGameViewModel(this.gameId, this.userId).then((result) => {
-        vm.viewModel = result
-        vm.redraw()
+    console.log('GET GAME')
+    this.interactor.getGame(this.gameId).then((gameData) => {
+      console.log('ADD PLAYER')
+      this.interactor.addPlayerToGame(this.gameId, this.userId).then(() => {
+        console.log('GET GAMEVIEWMODE')
+        vm.interactor.getGameViewModel(this.gameId, this.userId).then((result) => {
+          vm.viewModel = result
+          vm.redraw()
+        })
       })
     }).catch((error) => {
       // edge case, probably game full or game doesn't exist
-      console.error(error)
+      vm.displayError(error)
     })
   },
   methods: {
-
+    displayError (error) {
+      this.modalMessage = error
+      this.showModal = true
+    },
     redrawBattleship (battleship) {
       const index = this.viewModel.board.battleships.findIndex(b => b.id === battleship.id)
       if (index) {

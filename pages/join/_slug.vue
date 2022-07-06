@@ -33,11 +33,12 @@
 <script>
 import BaseTextInput from '../../components/BaseTextInput.vue'
 import ButtonLink from '../../components/ButtonLink.vue'
-import { addOrUpdatePlayerData, getPlayerData } from '../../scripts/services/playerService'
-import { PlayerData } from '../../scripts/dataEntities/playerData'
-import { GameData } from '../../scripts/dataEntities/gameData'
+// import { addOrUpdatePlayerData, getPlayerData } from '../../scripts/services/playerService'
+import { getPlayerData } from '../../scripts/services/playerService'
+// import { PlayerData } from '../../scripts/dataEntities/playerData'
+// import { GameData } from '../../scripts/dataEntities/gameData'
 import { useUserStore } from '../../store/userStore'
-import { addOrUpdateGameData } from '../../scripts/services/gameService'
+// import { addOrUpdateGameData } from '../../scripts/services/gameService'
 import { copyTextToClipboard } from '../../scripts/copyToClipboard'
 export default {
   name: 'JoinBattle',
@@ -74,18 +75,24 @@ export default {
     /**
      *
      */
-    handleJoin () {
-      if (this.userName === '') {
-        this.userName = 'No Name'
-      }
-      const player = addOrUpdatePlayerData(new PlayerData({ id: this.store.user.uid, name: this.userName }))
-      if (player) {
-        const game = addOrUpdateGameData(new GameData({ id: this.gameCode, boardSize: 10, player1: this.store.user.uid }))
-        if (game) {
-          this.$router.push(`/play/${this.gameCode}`)
-        }
-      }
-    },
+    // async handleJoin () {
+    //   if (this.userName === '') {
+    //     this.userName = 'No Name'
+    //   }
+    //   // Update the player record
+    //   const addPlayer = addOrUpdatePlayerData(new PlayerData({ id: this.store.user.uid, name: this.userName }))
+
+    //   // Create a new game or update existing
+    //   const addGame = addOrUpdateGameData(new GameData({ id: this.gameCode, boardSize: 10, player1: this.store.user.uid }))
+
+    //   const [addPlayerResult, addGameResult] = await Promise.all([addGame, addPlayer])
+
+    //   if (addPlayerResult && addGameResult) {
+    //     this.$router.push(`/play/${this.gameCode}`)
+    //   } else {
+
+    //   }
+    // },
     copyJoinUrlToClipboard () {
       const url = window.location.origin + window.location.pathname
       copyTextToClipboard(url)

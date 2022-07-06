@@ -11,6 +11,7 @@ const COLLECTION_ID = 'games'
  * @returns
  */
 export const getGameData = async function (id) {
+  console.log('GETGAMEDATA')
   const ref = doc(db, COLLECTION_ID, id).withConverter(GameDataConverter)
   const docSnap = await getDoc(ref)
   if (docSnap.exists()) {
@@ -57,6 +58,7 @@ const updateGame = async function (gameData) {
  * @returns
  */
 export const addOrUpdateGameData = async function (gameData) {
+  console.log('addOrUpdateGameData')
   await setDoc(doc(db, COLLECTION_ID, gameData.id).withConverter(GameDataConverter), gameData, { merge: true })
   return gameData
 }
