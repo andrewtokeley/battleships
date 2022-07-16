@@ -4,14 +4,14 @@
       Waiting for someone to Join...
     </h1>
 
-    <h1 v-if="isPlaying && yourMove">
+    <h1 v-if="isPlaying && yourMove" @click="showPlayerNameModal = true">
       Your Move {{ viewModel.yourName }}
     </h1>
     <h1 v-if="isPlaying && !yourMove">
       {{ viewModel.opponentName }}'s Move
     </h1>
 
-    <div v-if="!viewModel.yourReady">
+    <div v-if="!viewModel.yourReady" @click="showPlayerNameModal = true">
       <h1>
         Get Ready {{ viewModel.yourName }}
       </h1>
@@ -89,7 +89,7 @@
       </p>
       <input type="text" class="urlInput" :value="shareUrl">
     </modal-dialog>
-    <player-name-modal v-if="showPlayerNameModal" @close="showPlayerNameModal = false" />
+    <player-name-modal v-if="showPlayerNameModal" @nameChanged="sendNameChangeMessage" @close="showPlayerNameModal = false" />
     <pop-up v-if="showPopup" :message="hitMessage" @close="showPopup = false" />
   </div>
 </template>
@@ -155,7 +155,7 @@ export default {
       hitMessage: '',
       isSettingUp: true,
       showFireSpinner: false,
-      showPlayerNameModal: false,
+      showPlayerNameModal: true,
       isWaitingForJoin: true,
       isWaitingForReady: true,
       unsubscribeListener: [],
@@ -220,6 +220,9 @@ export default {
     }
   },
   watch: {
+    'store.playerName' (newVal) {
+      this.viewModel.yourName = newVal
+    },
     isPlaying () {
       if (this.isPlaying) {
         if (this.viewModel.isOwner) {
@@ -358,6 +361,10 @@ export default {
       this.unsubscribeListener.push(attachMessageListener(this.userId, this.gameId, 'ready', (message) => {
         vm.handleReady(message.data)
       }))
+
+      this.unsubscribeListener.push(attachMessageListener(this.userId, this.gameId, 'nameChange', (message) => {
+        vm.handleNameChange(message.data)
+      }))
     },
 
     /**
@@ -369,6 +376,28 @@ export default {
       } else {
         this.viewModel.currentPlayerId = this.viewModel.yourId
       }
+    },
+
+    /**
+     * Called when an opponent changes their name
+     */
+    handleNameChange (message) {
+      this.viewModel.opponentName = message.name
+    },
+
+    /**
+     * Sends a message to your opponent with your updated name
+     * @param {*} name
+     */
+    sendNameChangeMessage (name) {
+      send(new MessageData({
+        gameId: this.gameId,
+        forUserId: this.viewModel.opponentId,
+        messageType: 'nameChange',
+        data: {
+          name
+        }
+      }))
     },
 
     /**

@@ -120,7 +120,7 @@ export default {
     },
 
     handleClick (action) {
-      const result = action.handle(action)
+      const result = action.handler(action)
       if (result && action.confirmationMessage) {
         this.popupMessage = action.confirmationMessage
         this.showPopup(true)

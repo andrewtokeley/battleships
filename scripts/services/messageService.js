@@ -14,10 +14,9 @@ const COLLECTION_ID = 'messages'
  * @returns Promise resolving with the id of the message
  */
 export const send = async function (messageData, options) {
-  // augment the messageData with the message id to be deleted when received
-  if (options.deleteOnReceive) {
-    messageData.deleteOnReceive = true
-  }
+  // augment the messageData with whether to delete the message once processsed
+  messageData.deleteOnReceive = options ? (options.deleteOnReceive ?? true) : true
+
   const docRef = await addDoc(collection(db, COLLECTION_ID).withConverter(MessageDataConverter), messageData)
   return docRef.id
 }
@@ -60,7 +59,6 @@ export const attachMessageListener = function (userId, gameId, messageType, hand
  * @param {*} messageId document id of the message
  */
 export const deleteMessage = async function (messageId) {
-  console.log('delete message')
   const ref = doc(db, COLLECTION_ID, messageId)
   await deleteDoc(ref)
 }
