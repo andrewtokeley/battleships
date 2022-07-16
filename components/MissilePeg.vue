@@ -34,6 +34,10 @@ export default {
       const radius = this.board.layout.cellSize / 4
       ctx.beginPath()
       ctx.arc(coordinates.x, coordinates.y, radius, 0, 2 * Math.PI)
+      if (this.config.hit) {
+        ctx.strokeStyle = 'red'
+        ctx.stroke()
+      }
       if (this.config.isAim) {
         ctx.fillStyle = 'orange'
       } else {
