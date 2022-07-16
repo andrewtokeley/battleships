@@ -157,16 +157,18 @@ export default {
       const gridLineWidth = this.board.layout.gridLineWidth
       const width = this.board.layout.resolution
 
-      this.canvasContext.fillStyle = '#2363b6'
+      // should be same as --bs-blue
+      this.canvasContext.fillStyle = '#0b5394ff'
       this.canvasContext.fillRect(0, 0, width, width)
 
-      ctx.strokeStyle = 'white'
+      ctx.strokeStyle = '#3d85c6ff'
       let y = gridLineWidth
       for (let i = 0; i < (cellSize + 1); i++) {
         // Vertical
         this.canvasContext.beginPath()
         this.canvasContext.moveTo(gridLineWidth, y)
         this.canvasContext.lineTo(width, y)
+        this.canvasContext.lineWidth = gridLineWidth
         this.canvasContext.stroke()
         y = y + cellSize
       }
@@ -176,6 +178,7 @@ export default {
         this.canvasContext.beginPath()
         this.canvasContext.moveTo(x, gridLineWidth)
         this.canvasContext.lineTo(x, width)
+        this.canvasContext.lineWidth = gridLineWidth
         this.canvasContext.stroke()
         x = x + cellSize
       }
@@ -203,8 +206,8 @@ export default {
 
 @media only screen and (max-width: 600px) {
   .battlefield {
-  width: 100%;
-  height: 100%;
+  width: 80%;
+  height: 80%;
   }
 }
 

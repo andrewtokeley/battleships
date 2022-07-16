@@ -9,18 +9,19 @@ class GameData {
    *
    * @param {*} config data to construct the instance with;
    *  - id (this is the gameCode and unique firestore document id)
-   *  - boardSize
-   *  - player1
-   *  - player2 (optional)
-   *  - id (don't set, this is readonly and set by service methods only)
    *  - dateCreated (optional, should be a luxon DateTime)
+   *  - boardSize
+   *  - ownerId - the id of the user who created the game
+   *  - opponent - the id of the opponent
    */
   constructor (config) {
     this.id = config.id
     this.boardSize = config.boardSize ?? 10
     this.dateCreated = config.dateCreated ?? DateTime.local()
-    this.player1 = config.player1
-    this.player2 = config.player2
+    this.ownerId = config.ownerId
+    this.ownerReady = config.ownerReady
+    this.opponentId = config.opponentId
+    this.opponentReady = config.opponentReady
   }
 
   /**
@@ -30,30 +31,38 @@ class GameData {
    * @returns
    */
   playerExists (playerId) {
-    return this.player1 === playerId || this.player2 === playerId
+    return this.ownerId === playerId || this.opponentId === playerId
   }
 
-  /**
-   * Adds a new player to the game, if possible. If there are already 2 players in the game the function returns false, otherwise true
-   * @param {*} playerId
-   */
-  addPlayer (playerId) {
-    // can't add someone twice
-    if ([this.player1, this.player2].includes(playerId)) {
-      return false
-    }
+  // canJoin (playerId) {
+  //   return this.playerExists(playerId) || this.opponentId === null
+  // }
 
-    if (this.player1 == null) {
-      this.player1 = playerId
-      return true
-    } else if (this.player2 == null) {
-      this.player2 = playerId
-      return true
-    } else {
-      // No room for another player
-      return false
-    }
+  canPlay () {
+    return this.ownerReady && this.ownerReady
   }
+
+  // /**
+  //  * Adds a new player to the game, if possible. If there are already 2 players in the game the function returns false, otherwise true
+  //  * @param {*} playerId
+  //  */
+  // addPlayer (playerId) {
+  //   // can't add someone twice
+  //   if ([this.player1, this.player2].includes(playerId)) {
+  //     return false
+  //   }
+
+  //   if (this.player1 == null) {
+  //     this.player1 = playerId
+  //     return true
+  //   } else if (this.player2 == null) {
+  //     this.player2 = playerId
+  //     return true
+  //   } else {
+  //     // No room for another player
+  //     return false
+  //   }
+  // }
 }
 
 //
@@ -65,8 +74,8 @@ const GameDataConverter = {
     const result = {}
     if (game.boardSize) { result.boardSize = game.boardSize }
     if (game.dateCreated) { result.dateCreated = Timestamp.fromDate(game.dateCreated.toJSDate()) }
-    if (game.player1) { result.player1 = game.player1 }
-    if (game.player2) { result.player2 = game.player2 }
+    if (game.ownerId) { result.ownerId = game.ownerId }
+    if (game.opponentId) { result.opponentId = game.opponentId }
     return result
   },
 
@@ -76,8 +85,8 @@ const GameDataConverter = {
       id: snapshot.id,
       boardSize: data.boardSize,
       dateCreated: data.date ? DateTime.fromJSDate(data.date.toDate()) : DateTime.local(),
-      player1: data.player1,
-      player2: data.player2
+      ownerId: data.ownerId,
+      opponentId: data.opponentId
     }
 
     return new GameData(config)

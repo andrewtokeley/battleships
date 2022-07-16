@@ -6,26 +6,39 @@ class Battleship {
   /**
    * Create a new battleship instance
    *
-   * @param {*} location
-   * @param {*} length
-   * @param {*} vertical
+   * @param {*} config - object with properties;
+   * - id
+   * - name
+   * - location {row, column}
+   * - length
+   * - vertical
    */
-  constructor (id, location, length, vertical) {
-    this.id = id
-    this.location = location
-    this.length = length
-    this.vertical = vertical
+  constructor (config) {
+    this.id = config.id
+    this.type = config.type
+    this.location = config.location
+    this.name = config.name
+    this.length = config.length
+    this.vertical = config.vertical
     this.selected = false
   }
 
-  static fromBattleshipData (data) {
-    return new Battleship(data.id, data.location, data.length, data.vertical)
-  }
+  // static fromBattleshipData (data) {
+  //   return new Battleship({
+  //     id: data.id,
+  //     name: data.name,
+  //     location: data.location,
+  //     length: data.length,
+  //     vertical: data.vertical
+  //   })
+  // }
 
   /**
    * Returms an array of locations the battleship occupies
    */
   get cells () {
+    if (!this.location) { return null }
+
     const cells = []
     for (let i = 0; i < this.length; i++) {
       if (this.vertical) {
@@ -43,6 +56,7 @@ class Battleship {
    * @returns
    */
   intersectsWith (location) {
+    if (!this.location) { return false }
     if (this.vertical) {
       return location.column === this.location.column && location.row >= this.location.row && location.row < this.location.row + this.length
     } else {
@@ -56,6 +70,7 @@ class Battleship {
    * @returns
    */
   intersectsWithBattleship (battleship) {
+    if (!this.location) { return false }
     const cells = battleship.cells
     for (let i = 0; i < cells.length; i++) {
       if (this.intersectsWith(cells[i])) {
@@ -78,6 +93,7 @@ class Battleship {
    * @param {*} gridSize
    */
   moveBy (delta, gridSize) {
+    if (!this.location) { return }
     this.move({ row: this.location.row + delta.row, column: this.location.column + delta.column }, gridSize)
   }
 
@@ -88,6 +104,7 @@ class Battleship {
    * @param {*} gridSize
    */
   move (to, gridSize) {
+    if (!this.location) { return }
     let canMoveRow = false
     let canMoveColumn = false
     if (this.vertical) {
@@ -105,26 +122,16 @@ class Battleship {
    * The cell where the rotate action is located
    */
   get cellForRotate () {
+    if (!this.location) { return }
     return { row: this.location.row, column: this.location.column }
   }
 
   /**
    * The colour of the battleship based on it's length
    */
-  get colour () {
-    switch (this.length) {
-      case 2:
-        return '#ea9999ff'
-      case 3:
-        return '#6aa84fff'
-      case 4:
-        return '#b7b7b7ff'
-      case 5:
-        return '#f1c232ff'
-      default:
-        return 'clear'
-    }
-  }
+  // get colour () {
+
+  // }
 }
 
 export { Battleship }

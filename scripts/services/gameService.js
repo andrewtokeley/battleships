@@ -1,9 +1,27 @@
 
-import { getDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { onSnapshot, updateDoc, getDoc, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { GameDataConverter } from '../dataEntities/gameData'
 import { db } from './firebase'
 
 const COLLECTION_ID = 'games'
+
+export const attachGameListener = function (id, handler) {
+  return onSnapshot(
+    doc(db, COLLECTION_ID, id).withConverter(GameDataConverter),
+    { includeMetadataChanges: false },
+    (doc) => {
+      handler(doc)
+    })
+}
+
+/**
+ * Delete the game
+ */
+export const deleteGame = function (id) {
+  // delete from game collection
+  const ref = doc(db, COLLECTION_ID, id)
+  return deleteDoc(ref)
+}
 
 /**
  * Resolves with the GameData associated with the gameId. If no game exists the method will still resolve but with null.
@@ -11,44 +29,24 @@ const COLLECTION_ID = 'games'
  * @returns
  */
 export const getGameData = async function (id) {
-  console.log('GETGAMEDATA')
   const ref = doc(db, COLLECTION_ID, id).withConverter(GameDataConverter)
   const docSnap = await getDoc(ref)
   if (docSnap.exists()) {
-    const game = docSnap.data()
-    return game
+    return docSnap.data()
   } else {
     return null
   }
 }
 
 /**
- * Join a game
+ * Join the user to a game
+ *
  * @param {*} gameId id of the game
  * @param {*} userid id of the user joining
  */
 export const joinGame = async function (gameId, userId) {
-  // make sure the game exists
-  const game = await getGameData(gameId)
-  if (game && game.id === gameId) {
-    // game exists, but are there any player spots free
-    const gameData = {}
-    if (game.player1 && !game.player2) {
-      gameData.player2 = userId
-    } else if (game.player2 && !game.player1) {
-      gameData.player1 = userId
-    } else {
-      throw (new Error('No room for more players'))
-    }
-
-    await updateGame(gameData)
-  } else {
-    throw (new Error('Game does not exist'))
-  }
-}
-
-const updateGame = async function (gameData) {
-  await updateDoc(doc(db, COLLECTION_ID, gameData.id).withConverter(GameDataConverter), gameData)
+  // Simply update the opponentId document field
+  await updateDoc(doc(db, COLLECTION_ID, gameId).withConverter(GameDataConverter), { opponentId: userId })
 }
 
 /**
@@ -58,7 +56,6 @@ const updateGame = async function (gameData) {
  * @returns
  */
 export const addOrUpdateGameData = async function (gameData) {
-  console.log('addOrUpdateGameData')
   await setDoc(doc(db, COLLECTION_ID, gameData.id).withConverter(GameDataConverter), gameData, { merge: true })
   return gameData
 }

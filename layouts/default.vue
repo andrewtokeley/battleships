@@ -2,7 +2,7 @@
   <div class="global-container">
     <div class="container">
       <loading-spinner
-        v-if="!store.user.uid"
+        v-if="!store.user"
         class="loading-spinner"
         :size="50"
         :border-size="7"
@@ -15,7 +15,7 @@
         <h1 :style="{visibility: pageTitle ? 'visible' : 'hidden'}" class="page-heading">
           {{ pageTitle }}
         </h1>
-        <Nuxt v-if="store.user.uid" />
+        <Nuxt v-if="store.user" />
       </div>
     </div>
   </div>
@@ -25,12 +25,17 @@
 // Components
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 
-// this import with anonymously log the user in
-import '../scripts/services/auth'
-
 // once logged in the store will be updated
 import { useUserStore } from '../store/userStore'
 import convertPageTitle from '../scripts/pageTitle'
+// import { PlayerData } from '../scripts/dataEntities/playerData'
+
+// import { auth } from '../scripts/services/firebase'
+// import { getPlayerData, addOrUpdatePlayerData } from '../scripts/services/playerService'
+
+// this import with anonymously log the user in
+// import '../scripts/services/auth'
+import { signIn } from '../scripts/services/auth'
 
 export default {
   name: 'DefaultLayout',
@@ -62,6 +67,7 @@ export default {
   },
   mounted () {
     this.handleRouteChanged()
+    signIn(this.store)
   },
   methods: {
     handleRouteChanged () {
@@ -101,13 +107,14 @@ html {
   margin-right: auto;
   margin-left: auto;
   max-width: 800px;
-  height: 80%;
-  background: url(assets/battleships-cover.jpeg) no-repeat center center fixed;
+  height: 100%;
+  background: var(--bs-blue);
+  overflow-y: none;
 }
 
 .close-icon {
   float:right;
-  margin:20px;
+  margin:5px;
   color: white;
   font-size: var(--bs-font-size-large);
   cursor:pointer;

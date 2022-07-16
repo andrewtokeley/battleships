@@ -15,7 +15,7 @@ export const PlayerDataConverter = {
   fromFirestore (snapshot, options) {
     const data = snapshot.data(options)
     const config = {
-      userId: snapshot.id,
+      id: snapshot.id,
       name: data.name
     }
 

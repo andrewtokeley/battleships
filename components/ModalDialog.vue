@@ -1,5 +1,11 @@
 <template>
-  <div class="modal__mask" @click="$emit(&quot;close&quot;)">
+  <div class="modal__mask" @click="handleClose">
+    <div
+      :class="{ open: openPopup, close: closePopup }"
+      class="popup"
+    >
+      {{ popupMessage }}
+    </div>
     <div
       class="modal"
       :class="{
@@ -7,10 +13,10 @@
       }"
       @click="preventClickPropogation"
     >
-      <icon :options="iconOptions" class="modal__close-button" @click="$emit(&quot;close&quot;)">
+      <icon :options="iconOptions" class="modal__close-button" @click="handleClose">
         close
       </icon>
-      <h1 v-if="title">
+      <h1 v-if="title" class="modal__title">
         {{ title }}
       </h1>
       <div class="modal__content">
@@ -23,16 +29,16 @@
 
       <div v-if="actions" class="modal__footer">
         <template v-for="action in actions">
-          <button-link
+          <base-button
             :key="action.id"
             :is-primary="action.isPrimary"
             :is-secondary="action.isSecondary"
             :is-destructive="action.isDestructive"
             :show-spinner="action.showSpinner"
-            @click="handleClick(action)"
+            @click.native="handleClick(action)"
           >
             {{ action.title }}
-          </button-link>
+          </base-button>
         </template>
       </div>
     </div>
@@ -43,15 +49,14 @@
 // import { mapMutations } from 'vuex'
 import { constants } from '../scripts/constants'
 
-import ButtonLink from '../components/ButtonLink.vue'
+import BaseButton from '../components/BaseButton.vue'
 import Icon from '../components/Icon'
 
 export default {
   name: 'ModalDialog',
 
   components: {
-    ButtonLink,
-    // CloseDialogButton,
+    BaseButton,
     Icon
   },
 
@@ -76,6 +81,14 @@ export default {
 
   emits: ['close'],
 
+  data () {
+    return {
+      openPopup: false,
+      closePopup: true,
+      popupMessage: '&nbsp;'
+    }
+  },
+
   computed: {
     iconOptions () {
       const options = { ...constants.ICON_OPTIONS.ON_WHITE_ACTIONABLE }
@@ -85,27 +98,37 @@ export default {
       return options
     }
   },
-
   mounted () {
-    // this.addShortcutListener(
-    //   {
-    //     name: this.title,
-    //     callback: this.handleEscape,
-    //     listenTo: ['esc', 'Escape', 27]
-    //   }
-    // )
+    this.showPopup(false)
   },
-  // unmounted () {
-  //   this.removeShortcutListener(this.title)
-  // },
-
   methods: {
+    handleClose () {
+      // if there is a close handler, call it.
+      const action = this.actions.find(a => a.isCloseAction)
+      if (action) {
+        action.handler()
+      } else {
+        this.$emit('close')
+      }
+    },
+    showPopup (show) {
+      this.openPopup = show
+      this.closePopup = !show
+    },
     handleEscape () {
-      this.$emit('close')
+      this.handleClose()
     },
 
     handleClick (action) {
-      action.handle(action)
+      const result = action.handle(action)
+      if (result && action.confirmationMessage) {
+        this.popupMessage = action.confirmationMessage
+        this.showPopup(true)
+        const vm = this
+        setTimeout(function () {
+          vm.showPopup(false)
+        }, 2000)
+      }
     },
 
     // ...mapMutations({
@@ -152,6 +175,7 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -167,6 +191,13 @@ export default {
   border-radius: 5px;
   padding: 20px 20px;
   box-sizing: border-box;
+}
+
+h1.modal__title {
+  margin-top: 0px;
+  color: var(--bs-darkgrey);
+  font-size: var(--bs-font-size-large);
+  text-align: left;
 }
 
 .modal__close-button {
@@ -187,16 +218,15 @@ export default {
 .modal__heading {
   height: 30px;
   font-weight: bold;
-  font-size: var(--ish-font-size-large);
+  font-size: var(--bs-font-size-large);
   display: flex;
   align-items: center;
 }
 
 .modal__content {
-  color: var(--ish-mediumgrey);
-  font-size: 1em;
-  padding-top: 1em;
-  padding-bottom: 0em;
+  color: var(--bs-mediumgrey);
+  padding-top: 0em;
+  padding-bottom: 2em;
   box-sizing: border-box;
   flex-grow: 1;
   overflow-y: scroll;
@@ -204,7 +234,7 @@ export default {
 
 .modal__subTitle {
   height: 40px;
-  color: var(--ish-mediumgrey);
+  color: var(--bs-mediumgrey);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -216,6 +246,32 @@ export default {
   justify-content: flex-end;
   align-items: center;
   box-sizing: border-box;
+}
+
+.popup {
+  position: relative;
+  width: 200px;
+  /* top: -150px;
+  right: 20px; */
+  /* background: var(--bs-darkgrey); */
+  background: white;
+  color: var(--bs-darkgrey);
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-align: center;
+  transition: top 500ms, opacity 500ms;
+  opacity: 0;
+  margin-bottom: 20px;
+}
+
+.popup.close {
+  /* top: -150px; */
+  opacity: 0;
+}
+
+.popup.open {
+  /* top: 50px; */
+  opacity: 1;
 }
 
 @media only screen and (max-width: 600px) {

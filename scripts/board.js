@@ -1,4 +1,6 @@
 import { BattlefieldLayout } from './battlefieldLayout'
+import { Battleship } from './battleShip'
+import { BattleshipType } from './Types'
 
 /**
  * Represents a board
@@ -15,8 +17,20 @@ export class Board {
    */
   constructor (config) {
     this.size = config.size
-    this.layout = new BattlefieldLayout(1000, config.size, 2)
-    this.battleships = config.battleships
+    this.layout = new BattlefieldLayout(1000, config.size, 5)
+    if (config.battleships.length > 0) {
+      this.battleships = config.battleships
+    } else {
+      // we don't know the locations of the opponent, but need the ships to mark damage against
+      this.battleships = [
+        new Battleship({ type: BattleshipType.Carrier, name: BattleshipType.Carrier.name, length: 5 }),
+        new Battleship({ type: BattleshipType.Battleship, name: BattleshipType.Battleship.name, length: 4 }),
+        new Battleship({ type: BattleshipType.Cruiser, name: BattleshipType.Cruiser.name, length: 3 }),
+        new Battleship({ type: BattleshipType.Submarine, name: BattleshipType.Submarine.name, length: 3 }),
+        new Battleship({ type: BattleshipType.Destroyer, name: BattleshipType.Destroyer.name, length: 2 })
+      ]
+    }
+    this.damage = this.battleships.map((b) => { return { type: b.type, name: b.name, length: b.length, hits: 0 } })
     this.shots = config.shots
   }
 
@@ -44,5 +58,19 @@ export class Board {
       }
     }
     return true
+  }
+
+  /**
+   * Records when a battelship has been shot. This method is required because you won't
+   * have a record of battleships on your opponents board and we need to be able to do damage
+   * reports
+   */
+  recordDamage (battleshipName) {
+    const damage = this.damage.find(d => d.name.toUpperCase() === battleshipName.toUpperCase())
+    if (damage) {
+      damage.hits += 1
+    }
+    // Returns true if the ship sinks
+    return damage.hits === damage.length
   }
 }

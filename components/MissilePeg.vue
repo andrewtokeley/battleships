@@ -9,39 +9,36 @@ export default {
   props: {
     canvasContext: null,
     board: null,
-    // canvasContext: {
-    //   type: Object,
-    //   default: null
-    // },
-    // layout: {
-    //   type: Object,
-    //   default: null
-    // },
-    row: {
-      type: Number,
-      default: 1
+    config: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     },
-    column: {
+    redraw: {
       type: Number,
-      default: 1
-    },
-    hit: {
-      type: Boolean,
-      default: false
+      default: 0
+    }
+  },
+  watch: {
+    redraw () {
+      this.draw(this.canvasContext)
     }
   },
   mounted () {
     this.draw(this.canvasContext)
-
-    // this.attachListeners()
   },
   methods: {
     draw (ctx) {
-      const coordinates = this.layout.coordinatesAt(this.row, this.column, true)
+      const coordinates = this.board.layout.coordinatesAt(this.config.location, true)
       const radius = this.board.layout.cellSize / 4
       ctx.beginPath()
       ctx.arc(coordinates.x, coordinates.y, radius, 0, 2 * Math.PI)
-      ctx.fillStyle = this.hit ? 'red' : 'white'
+      if (this.config.isAim) {
+        ctx.fillStyle = 'orange'
+      } else {
+        ctx.fillStyle = this.config.colour
+      }
       ctx.fill()
     }
   }

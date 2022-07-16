@@ -8,6 +8,7 @@ class BattleshipData {
    *
    * @param {*} config - initial data for instance
    *  - id (don't set, will be set by retrieve service methods)
+   *  - name, the name of the battleship
    *  - gameId - the id (i.e. game code) of the game
    *  - playerId = user id the battleship belongs to
    *  - length = length of the battleship
@@ -15,6 +16,7 @@ class BattleshipData {
    */
   constructor (config) {
     this.id = config.id
+    this.name = config.name
     this.gameId = config.gameId
     this.playerId = config.playerId
     this.location = config.location
@@ -31,6 +33,7 @@ const BattleshipDataConverter = {
   toFirestore (battleship) {
     const result = {}
     if (battleship.gameId) { result.gameId = battleship.gameId }
+    if (battleship.name) { result.name = battleship.name }
     if (battleship.playerId) { result.playerId = battleship.playerId }
     if (battleship.location) { result.location = battleship.location }
     if (battleship.length) { result.length = battleship.length }
@@ -43,6 +46,7 @@ const BattleshipDataConverter = {
     const data = snapshot.data(options)
     const config = {
       id: snapshot.id,
+      name: data.name,
       gameId: data.gameId,
       playerId: data.playerId,
       location: data.location,

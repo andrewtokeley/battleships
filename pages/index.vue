@@ -4,9 +4,6 @@
       <ButtonLink :to="newGameUrl">
         PLAY
       </ButtonLink>
-      <ButtonLink to="/join">
-        JOIN
-      </ButtonLink>
     </div>
   </div>
 </template>
@@ -36,10 +33,11 @@ export default {
   },
   computed: {
     newGameUrl () {
-      return `/join/${this.newGameId}?new=true`
+      return `/play/${this.newGameId}`
     }
   },
   async mounted () {
+    // this won't create a new game but generates a new code
     this.newGameId = await uniqueGameCode()
   }
 }

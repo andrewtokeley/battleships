@@ -1,8 +1,9 @@
 /* Global variables */
 :root {
   --bs-bluehover: #2363b6;
-  --bs-blue: rgb(0, 74, 173);
-  --bs-lightblue: #32a5d3;
+  --bs-darkblue: #163156;
+  --bs-blue: #0b5394ff;
+  --bs-lightblue: #3d85c6ff;
   --bs-extralightgrey: rgb(248, 246, 246);
   --bs-lightgrey: rgb(231, 231, 231);
   --bs-mediumgrey: rgb(122, 122, 122);
@@ -10,18 +11,29 @@
   --bs-orange: #ff914d;
   --bs-red: #ad0606;
 
+  /* --bs-ship-5: #f1c232ff;
+  --bs-ship-4: #b7b7b7ff;
+  --bs-ship-3: #6aa84fff;
+  --bs-ship-2: #ea9999ff; */
+
+  --bs-ship-5: #3d85c6ff;
+  --bs-ship-4: #3d85c6ff;
+  --bs-ship-3: #3d85c6ff;
+  --bs-ship-2: #3d85c6ff;
+
   --bs-font-weight: 400;
   --bs-font-family: 'Work Sans', sans-serif;
   --bs-font-size-small: 0.8em;
   --bs-font-size-normal: 0.875rem;
   --bs-font-size-medium: 1.2em;
-  --bs-font-size-large: 2.5em;
+  --bs-font-size-large: 1.5em;
   --bs-font-size-extra-large: 3.0em;
 }
 
 body {
   font-family: var(--bs-font-family)
 }
+
 
 h1 {
   color: white;
