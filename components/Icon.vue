@@ -90,8 +90,9 @@ export default {
       // Defaults
       if (!options.isClickable) { options.isClickable = false }
       if (options.menu) {
-        if (!options.menu.rightAligned) { options.menu.rightAligned = true }
+        if (options.menu.rightAligned === null) { options.menu.rightAligned = true }
       }
+      console.log('sss')
       return options
     },
 

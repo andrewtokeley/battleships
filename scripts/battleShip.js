@@ -1,3 +1,5 @@
+import { BattleshipData } from './dataEntities/battleshipData'
+import { BattleshipType } from './Types'
 
 /**
  * Represents a battleship
@@ -23,15 +25,28 @@ class Battleship {
     this.selected = false
   }
 
-  // static fromBattleshipData (data) {
-  //   return new Battleship({
-  //     id: data.id,
-  //     name: data.name,
-  //     location: data.location,
-  //     length: data.length,
-  //     vertical: data.vertical
-  //   })
-  // }
+  static fromBattleshipData (data) {
+    return new Battleship({
+      id: data.id,
+      type: new BattleshipType(data.name),
+      name: data.name,
+      location: data.location,
+      length: data.length,
+      vertical: data.vertical
+    })
+  }
+
+  toBattleshipData (gameId, playerId) {
+    return new BattleshipData({
+      id: this.id,
+      name: this.name,
+      length: this.length,
+      location: this.location,
+      vertical: this.vertical,
+      gameId,
+      playerId
+    })
+  }
 
   /**
    * Returms an array of locations the battleship occupies
@@ -83,8 +98,18 @@ class Battleship {
   /**
    * Toggles the rotation of the battleship
    */
-  rotate () {
-    this.vertical = !this.vertical
+  rotate (gridSize) {
+    let canRotate = false
+    console.log('stop')
+    if (this.vertical) {
+      // will rotating move outside the grid
+      canRotate = this.location.column + this.length - 1 <= gridSize
+    } else {
+      canRotate = this.location.row + this.length - 1 <= gridSize
+    }
+    if (canRotate) {
+      this.vertical = !this.vertical
+    }
   }
 
   /**

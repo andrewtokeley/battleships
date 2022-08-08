@@ -18,6 +18,19 @@ export class ShotData {
     this.location = config.location
     this.hit = config.hit
     this.battleshipName = config.battleshipName
+    this.colour = config.colour
+  }
+
+  static fromShot (shot) {
+    return new ShotData({
+      id: shot.id,
+      gameId: shot.gameId,
+      playerId: shot.playerId,
+      location: shot.location,
+      hit: shot.hit,
+      battleshipName: shot.battleshipName,
+      colour: shot.colour
+    })
   }
 }
 
@@ -30,6 +43,7 @@ export const ShotDataConverter = {
     if (data.location) { result.location = data.location }
     if (data.hit) { result.hit = data.hit }
     if (data.battleshipName) { result.battleshipName = data.battleshipName }
+    if (data.colour) { result.colour = data.colour }
     return result
   },
 
@@ -42,7 +56,8 @@ export const ShotDataConverter = {
       playerId: data.playerId,
       location: data.location,
       hit: data.hit,
-      battleshipName: data.battleshipName
+      battleshipName: data.battleshipName,
+      colour: data.colour
     }
 
     return new ShotData(config)

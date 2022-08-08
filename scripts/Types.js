@@ -1,3 +1,11 @@
+export class ErrorType {
+  static GameFull = new ErrorType(1001, 'GameFull')
+  constructor (code, name) {
+    this.code = code
+    this.name = name
+  }
+}
+
 export class Board {
   static Opponent = new Board('opponent')
   static Own = new Board('own')
@@ -31,19 +39,20 @@ export class BattleshipType {
   }
 
   get colour () {
-    switch (this) {
-      case BattleshipType.Destroyer:
+    switch (this.name) {
+      case BattleshipType.Destroyer.name:
         return '#ea9999ff'
-      case BattleshipType.Submarine:
+      case BattleshipType.Submarine.name:
         return '#6aa84fff'
-      case BattleshipType.Cruiser:
+      case BattleshipType.Cruiser.name:
         return '#6aa84fff'
-      case BattleshipType.Battleship:
+      case BattleshipType.Battleship.name:
         return '#b7b7b7ff'
-      case BattleshipType.Carrier:
+      case BattleshipType.Carrier.name:
         return '#f1c232ff'
       default:
-        return 'clear'
+        console.log(this)
+        return 'red'
     }
   }
 }

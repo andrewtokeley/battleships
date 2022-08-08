@@ -1,36 +1,32 @@
 export const constants = {
   ICON_OPTIONS: {
-    RED: {
-      colour: 'var(--ish-red)',
-      size: '24px',
+    INDICATOR: {
+      colour: 'white',
+      size: '1.2em',
       background: {
         shape: 'CIRCLE',
         colour: 'transparent',
-        size: '32px',
-        borderRadius: '16px'
+        size: '1.5em',
+        borderRadius: '0.75em'
+      }
+    },
+    RED: {
+      colour: 'var(--bs-red)',
+      size: '1.2em',
+      background: {
+        shape: 'CIRCLE',
+        colour: 'transparent',
+        size: '1.5em',
+        borderRadius: '0.75em'
       },
       hover: {
         backgroundColour: 'transparent',
-        colour: 'var(--ish-red)'
-      }
-    },
-    BLUE: {
-      colour: 'white',
-      size: '24px',
-      background: {
-        shape: 'CIRCLE',
-        colour: 'var(--ish-blue)',
-        size: '32px',
-        borderRadius: '16px'
-      },
-      hover: {
-        backgroundColour: 'white',
-        colour: 'var(--ish-blue)'
+        colour: 'var(--bs-red)'
       }
     },
 
     BLUE_TRANSPARENT: {
-      colour: 'var(--ish-lightblue)',
+      colour: 'var(--bs-lightblue)',
       size: '24px',
       background: {
         shape: 'CIRCLE',

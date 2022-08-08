@@ -62,7 +62,7 @@ export default {
   props: {
     // must be supplied so the context menu is position relatively to it.
     activateElement: {
-      type: Object,
+      type: HTMLDivElement,
       default: undefined
     },
     rightAligned: {
@@ -128,9 +128,9 @@ export default {
     },
 
     blur () {
-      const vm = this
+      // const vm = this
       this.delayTimer = setTimeout(function () {
-        vm.close()
+        // vm.close()
       }, 200)
     },
 

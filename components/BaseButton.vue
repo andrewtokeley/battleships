@@ -55,11 +55,10 @@ export default {
   text-decoration: none;
   font-size: var(--bs-font-size-medium);
   font-weight: var(--bs-font-weight);
-  border: 1px solid var(--bs-blue);
+  border: 1px solid var(--bs-green);
   margin-left: 10px;
-  background: var(--bs-blue);
+  background: var(--bs-green);
   color: white;
-  /* height: 40px; */
   min-width: 100px;
   vertical-align: middle;
   transition: background 400ms;

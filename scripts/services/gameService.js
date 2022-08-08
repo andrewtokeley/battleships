@@ -2,6 +2,8 @@
 import { onSnapshot, updateDoc, getDoc, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { GameDataConverter } from '../dataEntities/gameData'
 import { db } from './firebase'
+import { deleteBattleships } from './battleshipService'
+import { deleteShots } from './shotService'
 
 const COLLECTION_ID = 'games'
 
@@ -18,9 +20,16 @@ export const attachGameListener = function (id, handler) {
  * Delete the game
  */
 export const deleteGame = function (id) {
+  // delete battleships
+  const _deleteBattleships = deleteBattleships(id)
+  // delete shots
+  const _deleteShots = deleteShots(id)
+
   // delete from game collection
   const ref = doc(db, COLLECTION_ID, id)
-  return deleteDoc(ref)
+  const _deleteGame = deleteDoc(ref)
+
+  return Promise.all([_deleteBattleships, _deleteShots, _deleteGame])
 }
 
 /**
@@ -36,6 +45,24 @@ export const getGameData = async function (id) {
   } else {
     return null
   }
+}
+
+/**
+ * Restarts a game by removing all shots and battleships and clearing the opponent
+ * @param {*} id the game id
+ * @returns
+ */
+export const restartGame = function (id) {
+  // delete battleships
+  const _deleteBattleships = deleteBattleships(id)
+  // delete shots
+  const _deleteShots = deleteShots(id)
+
+  // remove the opponent from the game
+  const ref = doc(db, COLLECTION_ID, id)
+  const _removeOpponent = updateDoc(ref, { opponentId: null })
+
+  return Promise.all([_deleteBattleships, _deleteShots, _removeOpponent])
 }
 
 /**

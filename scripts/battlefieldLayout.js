@@ -2,7 +2,7 @@ export class BattlefieldLayout {
   /**
    * Constructor
    * @param {*} resolution resolution width of the canvas
-   * @param {*} size  number of rows (or columns)
+   * @param {*} gridSize  number of rows (or columns)
    * @param {*} gridLineWidth the width of the grid line
    */
   constructor (resolution, gridSize, gridLineWidth) {

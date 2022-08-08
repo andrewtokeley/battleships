@@ -22,6 +22,7 @@ export default {
   },
   watch: {
     redraw () {
+      console.log('missile redraw')
       this.draw(this.canvasContext)
     }
   },

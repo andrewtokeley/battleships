@@ -13,6 +13,7 @@ class GameData {
    *  - boardSize
    *  - ownerId - the id of the user who created the game
    *  - opponent - the id of the opponent
+   *  - state - serialised Game state
    */
   constructor (config) {
     this.id = config.id
@@ -22,6 +23,7 @@ class GameData {
     this.ownerReady = config.ownerReady
     this.opponentId = config.opponentId
     this.opponentReady = config.opponentReady
+    this.state = config.state
   }
 
   /**
@@ -38,10 +40,14 @@ class GameData {
   //   return this.playerExists(playerId) || this.opponentId === null
   // }
 
-  canPlay () {
-    return this.ownerReady && this.ownerReady
-  }
+  // canPlay () {
+  //   return this.ownerReady && this.ownerReady
+  // }
 
+  canJoin (userId) {
+    console.log('canJoin')
+    return (this.playerExists(userId) || !this.opponentId)
+  }
   // /**
   //  * Adds a new player to the game, if possible. If there are already 2 players in the game the function returns false, otherwise true
   //  * @param {*} playerId
@@ -76,6 +82,7 @@ const GameDataConverter = {
     if (game.dateCreated) { result.dateCreated = Timestamp.fromDate(game.dateCreated.toJSDate()) }
     if (game.ownerId) { result.ownerId = game.ownerId }
     if (game.opponentId) { result.opponentId = game.opponentId }
+    if (game.state) { result.state = game.state }
     return result
   },
 
@@ -86,7 +93,8 @@ const GameDataConverter = {
       boardSize: data.boardSize,
       dateCreated: data.date ? DateTime.fromJSDate(data.date.toDate()) : DateTime.local(),
       ownerId: data.ownerId,
-      opponentId: data.opponentId
+      opponentId: data.opponentId,
+      state: data.state
     }
 
     return new GameData(config)

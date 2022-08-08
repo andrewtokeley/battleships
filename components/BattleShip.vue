@@ -55,12 +55,13 @@ export default {
   },
   methods: {
     draw (ctx) {
+      const internalCellSize = this.board.layout.cellSize - 2 * this.board.layout.gridLineWidth
       const coords = this.coordinates
       const rect = {
-        x: coords.x,
-        y: coords.y,
-        width: this.config.vertical ? this.board.layout.cellSize : this.board.layout.cellSize * this.config.length,
-        height: this.config.vertical ? this.board.layout.cellSize * this.config.length : this.board.layout.cellSize
+        x: coords.x + this.board.layout.gridLineWidth,
+        y: coords.y + this.board.layout.gridLineWidth,
+        width: this.config.vertical ? internalCellSize : this.board.layout.cellSize * this.config.length - 2 * this.board.layout.gridLineWidth,
+        height: this.config.vertical ? this.board.layout.cellSize * this.config.length - 2 * this.board.layout.gridLineWidth : internalCellSize
       }
       // Filled Rectangle (when not moving or selected)
       ctx.beginPath()

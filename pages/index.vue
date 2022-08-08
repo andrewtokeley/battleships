@@ -1,23 +1,36 @@
 <template>
   <div>
+    <modal-dialog v-if="showError" title="Yikes!" @close="showError = false">
+      {{ getErrorMessage($route.query.error) }}
+    </modal-dialog>
     <div class="button-group">
-      <ButtonLink :to="newGameUrl">
-        PLAY
-      </ButtonLink>
+      <BaseButton @click.native="$router.push(`/play/${newGameId}`)">
+        NEW GAME
+      </BaseButton>
+      <br>
+      <br>
+      <br>
+      <base-text-input v-model.trim="joinGameId" :options="{ placeholder: 'Game ID' , maximumLength: 5}" />
+      <BaseButton @click.native="join">
+        JOIN
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script>
 
-import ButtonLink from '../components/ButtonLink.vue'
 import { useUserStore } from '../store/userStore'
 import { uniqueGameCode } from '../scripts/services/gameService'
+import BaseButton from '../components/BaseButton.vue'
+import ModalDialog from '../components/ModalDialog.vue'
+import { errorMessage } from '../scripts/errorMessages'
 
 export default {
   name: 'IndexPage',
   components: {
-    ButtonLink
+    BaseButton,
+    ModalDialog
   },
   emits: ['pageTitleChanged'],
   setup () {
@@ -28,7 +41,9 @@ export default {
   },
   data () {
     return {
-      newGameId: ''
+      newGameId: '',
+      joinGameId: '',
+      showError: false
     }
   },
   computed: {
@@ -39,6 +54,17 @@ export default {
   async mounted () {
     // this won't create a new game but generates a new code
     this.newGameId = await uniqueGameCode()
+    this.showError = this.$route.query.error
+  },
+  methods: {
+    getErrorMessage (errorCode) {
+      return errorMessage(errorCode)
+    },
+    join () {
+      if (this.joinGameId.length === 5) {
+        this.$router.push(`/play/${this.joinGameId}`)
+      }
+    }
   }
 }
 </script>
@@ -48,7 +74,7 @@ export default {
 .button-group {
   position:absolute;
   display:flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
   bottom: 0px;

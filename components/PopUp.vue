@@ -1,6 +1,10 @@
 <template>
-  <div class="popup" :class="{animate: animateNow}">
-    <div>{{ message }}</div>
+  <div class="popup" :class="{'animate-in': animateIn, 'animate-out': animateOut}">
+    <div>
+      {{ message }} <span v-if="subMessage" :style="{color: subMessageColour}">
+        {{ subMessage }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -12,20 +16,43 @@ export default {
     message: {
       type: String,
       default: ''
+    },
+    subMessage: {
+      type: String,
+      default: ''
+    },
+    subMessageColour: {
+      type: String,
+      default: 'white'
     }
   },
   emits: ['close'],
   data () {
     return {
-      delay: 3000,
-      animateNow: false
+      delay: 2000,
+      animateOut: false,
+      animateIn: false
     }
   },
   mounted () {
-    // pause the given delay
-    // then emit a close event for the client to close
-    setTimeout(() => { this.animateNow = true }, 0)
-    setTimeout(() => { this.$emit('close') }, this.delay)
+    // animate in immediately (will take 500ms)
+    setTimeout(() => {
+      this.animateIn = true
+      console.log('fade in')
+    }, 0)
+
+    // wait delay, then animate away
+    setTimeout(() => {
+      this.animateOut = true
+      this.animateIn = false
+      console.log('fade out')
+    }, this.delay)
+
+    // close 500ms (the time it takes the animateOut to finish)
+    setTimeout(() => {
+      console.log('close')
+      this.$emit('close')
+    }, 3000)
   }
 }
 </script>
@@ -48,10 +75,16 @@ export default {
   font-size: 0em;
 }
 
-.popup.animate {
-  width: 80%;
+.popup.animate-in {
+  width: 75%;
   height: 150px;
-  font-size: 1.5em;
+  font-size: 1.3em;
+}
+
+.popup.animate-out {
+  width: 0ch;
+  height: 0px;
+  font-size: 0em;
 }
 
 .popup div {

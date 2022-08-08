@@ -57,6 +57,18 @@ export class Board {
         }
       }
     }
+
+    // Also need to check no battleships are off the board
+    for (let i = 0; i < this.battleships.length; i++) {
+      const battleship = this.battleships[i]
+      if (battleship.vertical && (battleship.location.row + battleship.length - 1 > this.layout.gridSize)) {
+        return false
+      }
+      if (!battleship.vertical && (battleship.location.column + battleship.length - 1 > this.layout.gridSize)) {
+        return false
+      }
+    }
+
     return true
   }
 
