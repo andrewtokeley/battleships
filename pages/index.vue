@@ -4,7 +4,7 @@
       {{ getErrorMessage($route.query.error) }}
     </modal-dialog>
     <div class="button-group">
-      <BaseButton @click.native="$router.push(`/play/${newGameId}`)">
+      <BaseButton @click.native="$router.push(`/new`)">
         NEW GAME
       </BaseButton>
       <br>
@@ -24,7 +24,7 @@ import { useUserStore } from '../store/userStore'
 import { uniqueGameCode } from '../scripts/services/gameService'
 import BaseButton from '../components/BaseButton.vue'
 import ModalDialog from '../components/ModalDialog.vue'
-import { errorMessage } from '../scripts/errorMessages'
+import { ErrorType } from '../scripts/Types'
 
 export default {
   name: 'IndexPage',
@@ -58,7 +58,12 @@ export default {
   },
   methods: {
     getErrorMessage (errorCode) {
-      return errorMessage(errorCode)
+      const error = ErrorType.fromCode(errorCode)
+      if (error) {
+        return error.description
+      } else {
+        return 'Unknown Error'
+      }
     },
     join () {
       if (this.joinGameId.length === 5) {

@@ -163,6 +163,7 @@ import { GameData } from '../../scripts/dataEntities/gameData'
 import { getPlayerData } from '../../scripts/services/playerService'
 import { Battleship } from '../../scripts/battleShip'
 import { ShotData } from '../../scripts/dataEntities/shotData'
+import { ErrorType } from '../../scripts/Types'
 
 export default {
   name: 'PlayGame',
@@ -391,8 +392,8 @@ export default {
             vm.redraw(vm.viewModel.yourBoard)
           })
         } else {
-        // can't play, redirect
-          vm.$router.push({ path: '/', query: { error: 1001 } })
+          // can't play someone else has joined this game
+          vm.$router.push({ path: '/', query: { error: ErrorType.GameFull.code } })
         }
       })
     },
@@ -473,12 +474,10 @@ export default {
      * Retrieve the gameData from the store. If no game exists one is created
      */
     async retrieveGameData () {
-      // retrieve the game from the store (or create new)
-      let gameData = await getGameData(this.gameId)
+      // retrieve the game from the store
+      const gameData = await getGameData(this.gameId)
       if (!gameData) {
-        gameData = new GameData({ id: this.gameId, boardSize: 10, ownerId: this.userId })
-        // save to data store, don't need to wait for result
-        addOrUpdateGameData(gameData)
+        this.$router.push({ path: '/', query: { error: ErrorType.GameDoesNotExist.code } })
       }
       return gameData
     },

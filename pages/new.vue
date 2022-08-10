@@ -12,26 +12,29 @@
     <p>share this battle code with your opponent!</p>
 
     <div class="button-group">
-      <button-link @click="handleJoin">
-        PLAY
-      </button-link>
+      <base-button @click.native="handlePlay">
+        LET'S GO
+      </base-button>
     </div>
   </div>
 </template>
 
 <script>
-import ButtonLink from '../components/ButtonLink.vue'
+
+import BaseButton from '../components/BaseButton.vue'
 import { useUserStore } from '../store/userStore'
+import { uniqueGameCode, addOrUpdateGameData } from '../scripts/services/gameService'
+import { GameData } from '../scripts/dataEntities/gameData'
 
 export default {
   name: 'NewBattle',
   components: {
-    ButtonLink
+    BaseButton
   },
   setup () {
     const store = useUserStore()
     return {
-      store
+      userId: store.user.uid
     }
   },
   data () {
@@ -44,12 +47,22 @@ export default {
       return [...this.gameCode]
     }
   },
-  mounted () {
+  async mounted () {
     // await addDefaultBattleships(game.id, this.store.user.uid)
-    this.gameCode = 'ADFEW'
+    this.gameCode = await uniqueGameCode()
   },
   methods: {
-    handleJoin () {
+    async handlePlay () {
+      // Actually create the game
+      const gameData = new GameData({
+        id: this.gameCode,
+        boardSize: 10,
+        ownerId: this.userId
+      })
+      await addOrUpdateGameData(gameData)
+
+      // redirect to play
+      this.$router.push(`/play/${this.gameCode}`)
       // you're joining your own game so add yourself, and new battleships here
     }
   }

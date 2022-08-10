@@ -1,8 +1,26 @@
 export class ErrorType {
-  static GameFull = new ErrorType(1001, 'GameFull')
-  constructor (code, name) {
+  static all = function () {
+    return [ErrorType.GameFull, ErrorType.GameDoesNotExist]
+  }
+
+  static GameFull = new ErrorType(1001, 'GameFull', 'Sorry, you can not join this game.')
+  static GameDoesNotExist = new ErrorType(1002, 'GameDoesNotExist', 'The game does not exist.')
+  static UnknownError = new ErrorType(0, 'UnknownError', 'Unknown error man.')
+
+  constructor (code, name, description) {
     this.code = code
     this.name = name
+    this.description = description
+  }
+
+  static fromCode (code) {
+    const codeValue = Number(code)
+    const error = ErrorType.all().find(e => e.code === codeValue)
+    if (error) {
+      return error
+    } else {
+      return ErrorType.UnknownError
+    }
   }
 }
 

@@ -128,9 +128,9 @@ export default {
     },
 
     blur () {
-      // const vm = this
+      const vm = this
       this.delayTimer = setTimeout(function () {
-        // vm.close()
+        vm.close()
       }, 200)
     },
 

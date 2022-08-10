@@ -9,9 +9,6 @@
         message="loading..."
       />
       <div v-else>
-        <div :style="{visibility: canClose ? 'visible' : 'hidden'}" class="close-icon material-icons" @click="handleBackNav">
-          close
-        </div>
         <h1 :style="{visibility: pageTitle ? 'visible' : 'hidden'}" class="page-heading">
           {{ pageTitle }}
         </h1>
@@ -50,7 +47,6 @@ export default {
   },
   data () {
     return {
-      canClose: false,
       pageTitle: ''
     }
   },
@@ -71,7 +67,6 @@ export default {
   },
   methods: {
     handleRouteChanged () {
-      this.canClose = window.history.length !== 0 && this.$router.history.current.fullPath !== '/'
       this.pageTitle = convertPageTitle(this.$route.name)
     },
     handleBackNav () {
