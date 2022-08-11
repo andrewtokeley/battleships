@@ -1,7 +1,7 @@
 /* Global variables */
 :root {
   --bs-bluehover: #2363b6;
-  --bs-darkblue: #163156;
+  --bs-darkblue: #222428;
   --bs-blue: #0b5394ff;
   --bs-lightblue: #3d85c6ff;
   --bs-extralightgrey: rgb(248, 246, 246);
@@ -10,7 +10,8 @@
   --bs-darkgrey: rgb(74, 74, 74);
   --bs-orange: #ff914d;
   --bs-red: #ad0606;
-  --bs-green: #78A65B;
+  --bs-green: #4E5B31;
+  --bs-sand: #998976;
   /* --bs-ship-5: #f1c232ff;
   --bs-ship-4: #b7b7b7ff;
   --bs-ship-3: #6aa84fff;

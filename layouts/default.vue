@@ -103,7 +103,7 @@ html {
   margin-left: auto;
   max-width: 800px;
   height: 100%;
-  background: var(--bs-blue);
+  background: var(--bs-sand);
   overflow-y: none;
 }
 

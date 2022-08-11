@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="background">
+    <div class="title" />
     <modal-dialog v-if="showError" title="Yikes!" @close="showError = false">
       {{ getErrorMessage($route.query.error) }}
     </modal-dialog>
@@ -8,12 +9,13 @@
         NEW GAME
       </BaseButton>
       <br>
-      <br>
-      <br>
-      <base-text-input v-model.trim="joinGameId" :options="{ placeholder: 'Game ID' , maximumLength: 5}" />
-      <BaseButton @click.native="join">
-        JOIN
-      </BaseButton>
+
+      <div class="joinGroup">
+        <base-text-input v-model.trim="joinGameId" :options="{ placeholder: 'CODE' , maximumLength: 5}" />
+        <BaseButton @click.native="join">
+          JOIN
+        </BaseButton>
+      </div>
     </div>
   </div>
 </template>
@@ -75,6 +77,34 @@ export default {
 </script>
 
 <style scoped>
+p {
+  color: var('--bs-darkblue');
+}
+.background {
+  background-image: url('~@/assets/battleship_image.jpg');
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.title {
+  position: absolute;
+    width: 90%;
+    height: 5%;
+    top: 120px;
+    left: 0px;
+    right: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url('~@/assets/battleship_title.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
 
 .button-group {
   position:absolute;
@@ -88,4 +118,9 @@ export default {
   margin-bottom: 80px;
 }
 
+.joinGroup {
+  display:flex;
+  flex-direction: row;
+  height: 40px;
+}
 </style>
