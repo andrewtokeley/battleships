@@ -1,85 +1,51 @@
 <template>
   <div class="background">
     <div class="title" />
-    <modal-dialog v-if="showError" title="Yikes!" @close="showError = false">
-      {{ getErrorMessage($route.query.error) }}
-    </modal-dialog>
+    <error-display v-if="showError" title="Yikes!" :error="error" @close="showError = false" />
     <div class="button-group">
-      <BaseButton @click.native="$router.push(`/new`)">
+      <BaseButton class="action-button" @click.native="$router.push(`/new`)">
         NEW GAME
       </BaseButton>
-      <br>
-
-      <div class="joinGroup">
-        <base-text-input v-model.trim="joinGameId" :options="{ placeholder: 'CODE' , maximumLength: 5}" />
-        <BaseButton @click.native="join">
-          JOIN
-        </BaseButton>
-      </div>
+      <BaseButton class="action-button" @click.native="$router.push(`/join`)">
+        JOIN
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script>
 
-import { useUserStore } from '../store/userStore'
-import { uniqueGameCode } from '../scripts/services/gameService'
 import BaseButton from '../components/BaseButton.vue'
-import ModalDialog from '../components/ModalDialog.vue'
-import { ErrorType } from '../scripts/Types'
+import ErrorDisplay from '../components/ErrorDisplay.vue'
+import { GameDefaultError } from '../scripts/Types'
 
 export default {
   name: 'IndexPage',
   components: {
     BaseButton,
-    ModalDialog
-  },
-  emits: ['pageTitleChanged'],
-  setup () {
-    const store = useUserStore()
-    return {
-      store
-    }
+    ErrorDisplay
   },
   data () {
     return {
-      newGameId: '',
-      joinGameId: '',
       showError: false
     }
   },
-  computed: {
-    newGameUrl () {
-      return `/play/${this.newGameId}`
-    }
-  },
-  async mounted () {
-    // this won't create a new game but generates a new code
-    this.newGameId = await uniqueGameCode()
-    this.showError = this.$route.query.error
-  },
-  methods: {
-    getErrorMessage (errorCode) {
-      const error = ErrorType.fromCode(errorCode)
-      if (error) {
-        return error.description
-      } else {
-        return 'Unknown Error'
-      }
-    },
-    join () {
-      if (this.joinGameId.length === 5) {
-        this.$router.push(`/play/${this.joinGameId}`)
-      }
+  mounted () {
+    const errorCode = this.$route.query.error
+    if (errorCode) {
+      this.error = new GameDefaultError(`Something went wrong (${errorCode})`)
+      this.showError = true
     }
   }
 }
 </script>
 
 <style scoped>
+
 p {
   color: var('--bs-darkblue');
 }
+
 .background {
   background-image: url('~@/assets/battleship_image.jpg');
   background-size: cover;
@@ -109,7 +75,7 @@ p {
 .button-group {
   position:absolute;
   display:flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
   bottom: 0px;
@@ -118,9 +84,9 @@ p {
   margin-bottom: 80px;
 }
 
-.joinGroup {
-  display:flex;
-  flex-direction: row;
-  height: 40px;
+.action-button {
+  width: 40%;
+  max-width: 200px;
 }
+
 </style>

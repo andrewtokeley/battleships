@@ -195,6 +195,9 @@ export default {
   flex-direction: row;
   justify-content: center;
   touch-action: none;
+  background-color: var(--bs-blue);
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .battlefield {

@@ -10,13 +10,7 @@
         <p v-show="!ready">
           Initialising...
         </p>
-        <div class="codeGroup">
-          <template v-for="(char, index) in gameCodeCharacters">
-            <div :key="index" class="code" :class="{blink: blinkFlag}">
-              {{ char }}
-            </div>
-          </template>
-        </div>
+        <code-input v-model="gameCode" :disabled="true" />
       </div>
       <base-button :style="{visibility: ready ? 'visible' : 'hidden'}" @click.native="handlePlay">
         LET'S GO
@@ -31,22 +25,23 @@ import BaseButton from '../components/BaseButton.vue'
 import { useUserStore } from '../store/userStore'
 import { uniqueGameCode, addOrUpdateGameData } from '../scripts/services/gameService'
 import { GameData } from '../scripts/dataEntities/gameData'
+import CodeInput from '../components/CodeInput.vue'
 
 export default {
   name: 'NewBattle',
   components: {
-    BaseButton
+    BaseButton,
+    CodeInput
   },
   setup () {
     const store = useUserStore()
     return {
-      userId: store.user.uid,
-      gameCodeCharacters: '00000'
+      userId: store.user.uid
     }
   },
   data () {
     return {
-      gameCode: '',
+      gameCode: '     ',
       ready: false,
       blinkFlag: false
     }
@@ -59,14 +54,12 @@ export default {
   mounted () {
     // await addDefaultBattleships(game.id, this.store.user.uid)
     const vm = this
-    this.setIntervalX(() => {
-      console.log('blink')
-      vm.blinkFlag = !vm.blinkFlag
-    }, 500, 10).then(async () => {
-      vm.blinkFlag = false
+    this.setIntervalX(async () => {
+      vm.gameCode = await uniqueGameCode()
+    }, 100, 20).then(async () => {
       vm.ready = true
-      this.gameCode = await uniqueGameCode()
-      vm.gameCodeCharacters = [...this.gameCode]
+      vm.gameCode = await uniqueGameCode()
+      vm.gameCode = this.gameCode
     })
   },
   methods: {
@@ -127,35 +120,8 @@ export default {
   background-size: contain;
   background-position: center;
 }
-
 .code-container {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  background-color: rgba(0, 0, 0, 0.2);
-  margin: 10px 0px 10px 0px;
-  padding-top: 10px;
-  padding-bottom: 20px;
-  color: white;
-  width: 100%;
-}
-
-.code-container .blink {
-  color: transparent;
-}
-
-.code-container .codeGroup {
-  display: flex;
-  flex-direction: row;
-}
-
-.code-container .code {
-  font-size: var(--bs-font-size-large);
-  font-family:courier, "courier new", monospace;
-  margin-right: 5px;
-  border-bottom: 2px;
-  border-bottom-style: solid;
-  border-bottom-color: white;
+  margin-bottom: 20px;
 }
 
 .code-container p {

@@ -23,7 +23,7 @@ class GameData {
     this.ownerReady = config.ownerReady
     this.opponentId = config.opponentId
     this.opponentReady = config.opponentReady
-    this.state = config.state
+    this.winnerId = config.winnerId
   }
 
   /**
@@ -82,7 +82,7 @@ const GameDataConverter = {
     if (game.dateCreated) { result.dateCreated = Timestamp.fromDate(game.dateCreated.toJSDate()) }
     if (game.ownerId) { result.ownerId = game.ownerId }
     if (game.opponentId) { result.opponentId = game.opponentId }
-    if (game.state) { result.state = game.state }
+    if (game.winnerId) { result.winnerId = game.winnerId }
     return result
   },
 
@@ -94,7 +94,7 @@ const GameDataConverter = {
       dateCreated: data.date ? DateTime.fromJSDate(data.date.toDate()) : DateTime.local(),
       ownerId: data.ownerId,
       opponentId: data.opponentId,
-      state: data.state
+      winnerId: data.winnerId
     }
 
     return new GameData(config)

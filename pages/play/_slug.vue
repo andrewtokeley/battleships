@@ -5,7 +5,7 @@
       class="loading-spinner"
       :size="50"
       :border-size="7"
-      message="creating game..."
+      message="almost there..."
     />
     <div v-else>
       <div class="menuIcon">
@@ -15,10 +15,6 @@
       </div>
       <h1 v-if="isGameOver">
         Game Over! {{ winnerName }} won!
-      </h1>
-
-      <h1 v-if="isWaitingForJoin && viewModel.yourReady">
-        Waiting for someone to Join...
       </h1>
 
       <h1 v-if="isPlaying && yourMove" @click="showPlayerNameModal = true">
@@ -31,9 +27,6 @@
       <h1 v-if="!isPlaying && !isGameOver">
         Get Ready <span class="playerName" @click="showPlayerNameModal = true">{{ yourName }}</span>
       </h1>
-      <!-- <h1 v-else>
-      {{ viewModel.opponentName }} vs <span class="playerName" @click="showPlayerNameModal = true">{{ yourName }}</span>
-    </h1> -->
 
       <p v-if="!viewModel.yourReady" class="subHeading">
         Position your ships for battle
@@ -53,7 +46,6 @@
           :initial-tab="tabOnLoad"
           @change="handlePlayerSwitch"
         />
-      <!-- <damage-report v-if="activeBoard" :damage="activeBoard.damage" /> -->
       </div>
       <battle-field
         v-if="activeBoard"
@@ -86,7 +78,8 @@
       </battle-field>
 
       <div class="messages">
-        <base-button v-if="isWaitingForJoin" @click.native="handleInvite">
+        <!-- if no opponent yet -->
+        <base-button v-if="!viewModel.opponentId" @click.native="handleInvite">
           Invite a friend...
         </base-button>
 
@@ -98,7 +91,7 @@
           You're playing against {{ viewModel.opponentName }}
         </p>
 
-        <base-button v-if="isGameOver" @click.native="$router.go()">
+        <base-button v-if="isGameOver" @click.native="$router.push('/new')">
           Play Again?
         </base-button>
 
@@ -106,22 +99,17 @@
           Fire!
         </base-button>
       </div>
+
       <!-- Modals -->
-      <modal-dialog v-if="showErrorModal" title="Yeah, about that" :actions="errorModalActions" @close="showErrorModal = false">
-        {{ errorMessage }}
-      </modal-dialog>
-      <modal-dialog
-        v-if="showInviteModal"
-        title="Invite a friend"
-        :actions="inviteModalActions"
-        @close="showInviteModal = false"
-      >
-        <p>
-          Copy and share link to play with a friend!
-        </p>
-        <input type="text" class="urlInput" :value="shareUrl">
-      </modal-dialog>
+
+      <battle-statistics v-if="showBattleStats" :opponent-id="viewModel.opponentId" :opponent-name="viewModel.opponentName" @close="showBattleStats = false" />
+
+      <error-display v-if="showErrorModal" :error="error" @close="showErrorModal = false" />
+
+      <share-game v-if="showInviteModal" :game-id="gameId" @close="showInviteModal = false" />
+
       <player-name-modal v-if="showPlayerNameModal" @nameChanged="sendNameChangeMessage" @close="showPlayerNameModal = false" />
+
       <pop-up v-if="showPopup" :message="popupMessage" :sub-message="popupSubMessage" :sub-message-colour="popupSubMessageColour" @close="showPopup = false" />
     </div>
   </div>
@@ -139,35 +127,36 @@ import BattleShipComponent from '../../components/BattleShip.vue'
 import PlayerSwitch from '../../components/PlayerSwitch.vue'
 import PlayerNameModal from '../../components/PlayerNameModal.vue'
 import BaseButton from '../../components/BaseButton.vue'
-import ModalDialog from '../../components/ModalDialog.vue'
 import PopUp from '../../components/PopUp.vue'
+import BattleStatistics from '../../components/BattleStatistics.vue'
+import ShareGame from '../../components/ShareGame.vue'
 
 // Store
 import { useUserStore } from '../../store/userStore'
 
 // Services
-import { joinGame, getGameData, addOrUpdateGameData, restartGame, deleteGame } from '../../scripts/services/gameService'
+import { joinGame, getGameData, addOrUpdateGameData } from '../../scripts/services/gameService'
 import { attachMessageListener, send } from '../../scripts/services/messageService'
 import { getDefaultBattleships, addBattleships, getBattleships } from '../../scripts/services/battleshipService'
 import { addOrUpdateShot, getShots } from '../../scripts/services/shotService'
 
 // Utilities
-import { copyTextToClipboard } from '../../scripts/copyToClipboard'
+// import { copyTextToClipboard } from '../../scripts/copyToClipboard'
 import { constants } from '../../scripts/constants'
+import { GameCantBeJoinedError, GameDefaultError, GameDoesNotExistError, GameFullError } from '../../scripts/Types'
 
 // Types
 import { Shot } from '../../scripts/Shot'
 import { MessageData } from '../../scripts/dataEntities/messageData'
 import { Board } from '../../scripts/board'
-import { GameData } from '../../scripts/dataEntities/gameData'
 import { getPlayerData } from '../../scripts/services/playerService'
 import { Battleship } from '../../scripts/battleShip'
 import { ShotData } from '../../scripts/dataEntities/shotData'
-import { ErrorType } from '../../scripts/Types'
+import ErrorDisplay from '../../components/ErrorDisplay.vue'
 
 export default {
   name: 'PlayGame',
-  components: { BattleField, MissilePeg, BattleShipComponent, ModalDialog, BaseButton, PlayerSwitch, PlayerNameModal, PopUp },
+  components: { BattleField, MissilePeg, BattleShipComponent, BaseButton, PlayerSwitch, PlayerNameModal, PopUp, BattleStatistics, ShareGame, ErrorDisplay },
   setup () {
     const store = useUserStore()
     return {
@@ -181,16 +170,15 @@ export default {
       activeBoard: null,
       selectedBattleship: null,
       isDragging: false,
-      // currentPlayer: 1,
       redrawBattlefield: 0,
       redrawShip: [],
       redrawShot: [],
-      cursor: 'default',
       isShooting: false,
       showErrorModal: false,
       showInviteModal: false,
-      errorMessage: '',
+      error: null,
       showInviteBlock: false,
+      showBattleStats: false,
       popupMessage: '',
       popupSubMessage: '',
       popupSubMessageColour: 'white',
@@ -214,25 +202,26 @@ export default {
           }
         }
       ],
-      inviteModalActions: [
-        {
-          id: 0,
-          title: 'Cancel',
-          isSecondary: true,
-          handler: () => {
-            vm.showInviteModal = false
-          }
-        },
-        {
-          id: 1,
-          title: 'Copy',
-          confirmationMessage: 'copied',
-          handler: () => {
-            copyTextToClipboard(this.shareUrl)
-            return true
-          }
-        }
-      ]
+      // inviteModalActions: [
+      //   {
+      //     id: 0,
+      //     title: 'Cancel',
+      //     isSecondary: true,
+      //     handler: () => {
+      //       vm.showInviteModal = false
+      //     }
+      //   },
+      //   {
+      //     id: 1,
+      //     title: 'Copy',
+      //     confirmationMessage: 'copied',
+      //     handler: () => {
+      //       copyTextToClipboard(this.shareUrl)
+      //       return true
+      //     }
+      //   }
+      // ],
+      cursor: 'default'
     }
   },
   computed: {
@@ -242,7 +231,7 @@ export default {
       options.menu = {
         rightAligned: false,
         menuItems: [
-          { id: 0, name: 'Restart', iconName: 'refresh' },
+          { id: 0, name: 'Battle Stats', iconName: 'list' },
           { id: 2, name: 'Quit', iconName: 'close' },
           { isDivider: true },
           { id: 3, name: 'v 1.2', isFullWidth: true, isLabel: true }
@@ -281,6 +270,13 @@ export default {
       return (this.viewModel.yourHitTotal === this.viewModel.hitsForWin) ? this.yourName : this.viewModel.opponentName
     },
 
+    winnerId () {
+      if (!this.isGameOver) {
+        return null
+      }
+      return (this.viewModel.yourHitTotal === this.viewModel.hitsForWin) ? this.yourName : this.viewModel.opponentName
+    },
+
     isGameOver () {
       return this.viewModel.yourHitTotal === this.viewModel.hitsForWin || this.viewModel.opponentHitTotal === this.viewModel.hitsForWin
     },
@@ -290,7 +286,7 @@ export default {
     },
 
     shareUrl () {
-      return `${window.location.origin}/play/${this.gameId}`
+      return `${window.location.origin}/join/${this.gameId}`
     },
 
     gameId () {
@@ -309,9 +305,9 @@ export default {
 
   },
   watch: {
-    'store.playerName' (newVal) {
-      this.yourName = newVal
-    },
+    // ''store.playerName' (newVal) {
+    //   this.yourName = newVal
+    // },'
     isPlaying () {
       if (this.isPlaying) {
         if (this.viewModel.isOwner) {
@@ -338,7 +334,8 @@ export default {
     startGame () {
       const vm = this
       vm.retrieveGameData().then(function (gameData) {
-        if (gameData.canJoin(vm.userId)) {
+        // can only play if you've joined or it was your game
+        if (gameData.playerExists(vm.userId)) {
           vm.attachListeners()
           vm.isSettingUp = true
           vm.isWaitingForJoin = true
@@ -347,65 +344,37 @@ export default {
           // define the viewModel from the gameData
           vm.getViewModel(vm.userId, gameData).then((viewModel) => {
             vm.viewModel = viewModel
+
+            // Assume if they still have the default name, they'll want to update it
             if (vm.yourName.startsWith('Player')) {
               vm.showPlayerNameModal = true
             }
 
-            if (!gameData.opponentId) {
-            // check whether the current user is trying to join
-              if (!vm.viewModel.isOwner) {
-              // This is someone wanting to join someone else's game
-                console.log('Wants to join game')
-                // Can assume the owner has joined
-                vm.isWaitingForJoin = false
-
-                // Let the owner know you're joinging
-                vm.joinGame(gameData, vm.userId, vm.store.playerName)
-              } else {
-              // This is the owner re-loading their own game and still waiting for an opponent
-                console.log('Owner refreshing own game')
-                vm.isWaitingForJoin = true
-              }
-            } else if (!gameData.playerExists(vm.userId)) {
-            // Someone is trying to play an existing game that has players
-              vm.displayError('Someone else has joined this game already.')
-            } else {
-            // Either the owner or opponent is re-loading the game
-
-              // Regardless we need to know whether the other player is ready (we may have missed it)
-              // Assume they're not ready, handling the ping response will update if they are
-              if (vm.viewModel.isOwner) {
-                console.log('Owner refreshing own game')
-              } else {
-                console.log('Refreshing game (not owner)')
-              }
-              vm.isWaitingForJoin = !vm.viewModel.opponentId
-              vm.isWaitingForReady = !vm.viewModel.opponentReady
-              vm.ping()
-            }
+            // if the opponentId hasn't been defined, this is the owner and they are still waiting
+            vm.isWaitingForJoin = !gameData.opponentId
+            vm.isWaitingForReady = !vm.viewModel.opponentReady
 
             // Show your own board to let you position your battleships
             vm.handlePlayerSwitch(1)
-
             vm.tabOnLoad = vm.yourMove ? 2 : 1
 
             vm.redraw(vm.viewModel.yourBoard)
           })
         } else {
           // can't play someone else has joined this game
-          vm.$router.push({ path: '/', query: { error: ErrorType.GameFull.code } })
+          vm.$router.push({ path: '/', query: { error: new GameFullError(gameData.id).code } })
         }
       })
     },
 
-    restartGame () {
-      const vm = this
-      // call the service to restart game, this will load the battleships and shots
-      restartGame(this.gameId).then(() => {
-        vm.startGame(vm.gameId)
-        alert('Done')
-      })
-    },
+    // restartGame () {
+    //   const vm = this
+    //   // call the service to restart game, this will load the battleships and shots
+    //   restartGame(this.gameId).then(() => {
+    //     vm.startGame(vm.gameId)
+    //     alert('Done')
+    //   })
+    // },
 
     /**
      *
@@ -413,8 +382,8 @@ export default {
     handleMenuClick (menuItem) {
       switch (menuItem.id) {
         case 0:
-          // Restart
-          this.restartGame()
+          // BattleStats
+          this.showBattleStats = true
           break
         case 1:
           alert('delete')
@@ -428,9 +397,10 @@ export default {
 
     quitGame () {
       const vm = this
-      deleteGame(this.gameId).then(() => {
-        vm.$router.push('/')
-      })
+      vm.$router.push('/')
+      // deleteGame(this.gameId).then(() => {
+
+      // })
     },
 
     /**
@@ -441,6 +411,10 @@ export default {
         this.popupMessage = `${this.winnerName} won!`
         this.popupSubMessage = ''
         this.showPopup = true
+
+        // save the winner to the game
+        addOrUpdateGameData({ id: this.gameCode, winnerId: this.winnerId })
+
         return true
       }
       return false
@@ -477,7 +451,9 @@ export default {
       // retrieve the game from the store
       const gameData = await getGameData(this.gameId)
       if (!gameData) {
-        this.$router.push({ path: '/', query: { error: ErrorType.GameDoesNotExist.code } })
+        this.$router.push({ path: '/', query: { error: new GameDoesNotExistError(this.gameId).code } })
+      } else if (gameData.ownerId !== this.userId && gameData.opponentId !== this.userId) {
+        this.$router.push({ path: '/', query: { error: new GameCantBeJoinedError(this.gameId).code } })
       }
       return gameData
     },
@@ -539,6 +515,7 @@ export default {
       console.log('handleReady')
       // no loner waiting for someone to accept invite
       this.isWaitingForReady = false
+      this.isWaitingForJoin = false
 
       // mark your opponent as ready
       this.viewModel.opponentReady = true
@@ -573,21 +550,21 @@ export default {
         vm.handleNameChange(message.data)
       }))
 
-      this.unsubscribeListener.push(attachMessageListener(this.userId, this.gameId, 'ping', () => {
-        vm.handlePing()
-      }))
+      // this.unsubscribeListener.push(attachMessageListener(this.userId, this.gameId, 'ping', () => {
+      //   vm.handlePing()
+      // }))
     },
 
-    /**
-     * See if your opponent is ready (they may have sent a ready message that you missed)
-     */
-    ping () {
-      send(new MessageData({
-        gameId: this.gameId,
-        forUserId: this.viewModel.opponentId,
-        messageType: 'ping'
-      }))
-    },
+    // /**
+    //  * See if your opponent is ready (they may have sent a ready message that you missed)
+    //  */
+    // ping () {
+    //   send(new MessageData({
+    //     gameId: this.gameId,
+    //     forUserId: this.viewModel.opponentId,
+    //     messageType: 'ping'
+    //   }))
+    // },
 
     /**
      * Toggles the current player between the owner and opponenent.
@@ -600,19 +577,19 @@ export default {
       }
     },
 
-    /**
-     * Called when a user pings to see if you're ready to play
-     * @param {*} data
-     */
-    handlePing () {
-      console.log('Received Ping')
-      // if (this.viewModel.yourReady) {
-      //   console.log('Re-declaring ready')
-      //   this.declareReady()
-      // } else {
-      //   // received a ping but not ready
-      // }
-    },
+    // /**
+    //  * Called when a user pings to see if you're ready to play
+    //  * @param {*} data
+    //  */
+    // handlePing () {
+    //   console.log('Received Ping')
+    //   // if (this.viewModel.yourReady) {
+    //   //   console.log('Re-declaring ready')
+    //   //   this.declareReady()
+    //   // } else {
+    //   //   // received a ping but not ready
+    //   // }
+    // },
 
     /**
      * Called when an opponent changes their name
@@ -649,7 +626,7 @@ export default {
       //   }
       // }
       this.viewModel.opponentId = joinData.userId
-      this.viewModel.opponentName = joinData.name
+      this.viewModel.opponentName = joinData.playerName
       this.viewModel.opponentReady = false
       this.isWaitingForJoin = false
     },
@@ -808,7 +785,7 @@ export default {
 
       // Don't let a user fire without selecting a shot
       if (!shot) {
-        this.displayError('Click on the board to aim your shot before firing')
+        this.displayError(new GameDefaultError('Click on the board to aim your shot before firing'))
         this.showErrorModal = true
         return
       }
@@ -850,10 +827,10 @@ export default {
     /**
      * Creates a new game record in the data store and refreshes the ViewModel
      */
-    async handleNewGame () {
-      const gameData = new GameData({ id: this.gameId, boardSize: 10, ownerId: this.userId })
-      return await addOrUpdateGameData(gameData)
-    },
+    // async handleNewGame () {
+    //   const gameData = new GameData({ id: this.gameId, boardSize: 10, ownerId: this.userId })
+    //   return await addOrUpdateGameData(gameData)
+    // },
 
     /**
      * Called when you want to join someone else's game
@@ -888,25 +865,34 @@ export default {
      * @param {*} gameData
      */
     async getViewModel (userId, gameData) {
-      console.log('getViewModel')
       // See if the user already saved battleshps (can happen if they are coming back to an unfinished game)
+      let yourReady = false
       let battleships = await getBattleships(gameData.id, userId)
       if (!battleships || battleships.length === 0) {
         // Otherwise get some default battleships and postions
         battleships = getDefaultBattleships()
       } else {
         battleships = battleships.map((b) => { return Battleship.fromBattleshipData(b) })
+        yourReady = true
       }
-
+      // who created the game and is the owner
       const isOwner = userId === gameData.ownerId
+
+      // who are you playing against
       const opponentId = isOwner ? gameData.opponentId : gameData.ownerId
+
+      // see if the opponent is ready by checking whether they have battleships saved
+      // bit of a hack!
+      let opponentReady = false
+      if (opponentId) {
+        const ob = await getBattleships(gameData.id, opponentId)
+        opponentReady = ob.length > 0
+      }
 
       // Any shots fired?
       const yourShots = await getShots(gameData.id, userId)
-      const yourReady = yourShots.length > 0
 
       // Ignore the colour of the shot for your opponent, always make hits red, misses white
-      let opponentReady = false
       let opponentShots = []
       if (opponentId) {
         opponentShots = await getShots(gameData.id, opponentId)
@@ -918,8 +904,10 @@ export default {
           }
           return shot
         })
-        opponentReady = opponentShots.length > 0
       }
+      // Count how many hits you each have
+      const yourHits = yourShots.filter(s => s.hit).length
+      const opponentHits = opponentShots.filter(s => s.hit).length
 
       // Find the other players name
       let opponentPlayer = null
@@ -927,8 +915,9 @@ export default {
         opponentPlayer = await getPlayerData(opponentId)
       }
 
-      let currentPlayerId = gameData.ownerId
-      if (opponentShots.length > 0 && opponentShots.length < yourShots.length) {
+      // assume it's your turn, unless your opponent has less shots than you
+      let currentPlayerId = userId
+      if (opponentShots.length < yourShots.length) {
         currentPlayerId = opponentId
       }
       // console.log(currentPlayerId)
@@ -938,7 +927,7 @@ export default {
         gameCode: gameData.id,
         isOwner,
         yourReady,
-        yourHitTotal: 0,
+        yourHitTotal: yourHits,
         yourBoard: new Board({
           battleships,
           size: gameData.boardSize,
@@ -948,7 +937,7 @@ export default {
         opponentId: opponentPlayer ? opponentPlayer.id : null,
         opponentName: opponentPlayer ? opponentPlayer.name : null,
         opponentReady,
-        opponentHitTotal: 0,
+        opponentHitTotal: opponentHits,
         opponentBoard: new Board({
           battleships: [],
           size: gameData.boardSize,
@@ -965,7 +954,7 @@ export default {
     // },
 
     displayError (error) {
-      this.errorMessage = error
+      this.error = error
       this.showErrorModal = true
     },
     // redrawBattleship (board, battleship) {
@@ -1086,6 +1075,10 @@ export default {
 
 <style scoped>
 
+.loading-spinner {
+  margin-top: 100px;
+}
+
 .menuIcon {
   margin-left: 20px;
   float: left;
@@ -1107,20 +1100,14 @@ p.subHeading {
 
 .player-strip {
   margin-top: 20px;
-  /* display: grid; */
-  /* grid-template-columns: repeat(2, 1fr); */
   justify-content: center;
   align-items: center;
   color:white;
   width: 100%;
-  min-height: 50px;
-  padding: 10px;
   box-sizing: border-box;
 }
 .player-strip__switcher {
-  /* grid-column: 1 / 3; */
   width: 100%;
-  margin-bottom: 20px;
 }
 .messages {
   margin-top: 20px;
@@ -1132,21 +1119,6 @@ p.subHeading {
   min-height: 100px;
   padding: 10px;
   box-sizing: border-box;
-}
-
-.urlInput {
--webkit-appearance: none;
-  height: 30px;
-  width: 100%;
-  min-width: 300px;
-  border-radius: 5px;
-  background: var(--bs-lightgrey);
-  cursor: text;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
-  border: 0;
-  padding: 15px;
-  font-size: var(--bs-font-normal);
 }
 
 user agent stylesheet input[type="text" i] {
