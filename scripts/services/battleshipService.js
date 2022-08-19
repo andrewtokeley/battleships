@@ -103,16 +103,14 @@ export const addBattleships = async function (battleships) {
 /**
  * Returns the default start battleships
  *
- * @param {*} gameData
- * @param {*} playerId
- * @returns
+ * @returns an array of Battleship instances
  */
 export const getDefaultBattleships = function () {
   return [
-    new Battleship({ type: BattleshipType.Carrier, name: BattleshipType.Carrier.name, location: { row: 2, column: 2 }, length: 5, vertical: false }),
-    new Battleship({ type: BattleshipType.Battleship, name: BattleshipType.Battleship.name, location: { row: 4, column: 2 }, length: 4, vertical: false }),
-    new Battleship({ type: BattleshipType.Cruiser, name: BattleshipType.Cruiser.name, location: { row: 6, column: 2 }, length: 3, vertical: false }),
-    new Battleship({ type: BattleshipType.Submarine, name: BattleshipType.Submarine.name, location: { row: 6, column: 6 }, length: 3, vertical: false }),
+    // new Battleship({ type: BattleshipType.Carrier, name: BattleshipType.Carrier.name, location: { row: 2, column: 2 }, length: 5, vertical: false }),
+    // new Battleship({ type: BattleshipType.Battleship, name: BattleshipType.Battleship.name, location: { row: 4, column: 2 }, length: 4, vertical: false }),
+    // new Battleship({ type: BattleshipType.Cruiser, name: BattleshipType.Cruiser.name, location: { row: 6, column: 2 }, length: 3, vertical: false }),
+    // new Battleship({ type: BattleshipType.Submarine, name: BattleshipType.Submarine.name, location: { row: 6, column: 6 }, length: 3, vertical: false }),
     new Battleship({ type: BattleshipType.Destroyer, name: BattleshipType.Destroyer.name, location: { row: 8, column: 2 }, length: 2, vertical: false })
   ]
 }

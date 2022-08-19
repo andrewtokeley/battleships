@@ -1,26 +1,32 @@
-export class ErrorType {
-  static all = function () {
-    return [ErrorType.GameFull, ErrorType.GameDoesNotExist]
+export class GameFullError extends Error {
+  constructor (gameId) {
+    super(`Game ${gameId} is full.`)
+    this.code = 1001
+    this.name = 'GameFullError'
   }
+}
 
-  static GameFull = new ErrorType(1001, 'GameFull', 'Sorry, you can not join this game.')
-  static GameDoesNotExist = new ErrorType(1002, 'GameDoesNotExist', 'The game does not exist.')
-  static UnknownError = new ErrorType(0, 'UnknownError', 'Unknown error man.')
-
-  constructor (code, name, description) {
-    this.code = code
-    this.name = name
-    this.description = description
+export class GameDoesNotExistError extends Error {
+  constructor (gameId) {
+    super(`Game ${gameId} does not exist.`)
+    this.code = 1002
+    this.name = 'GameDoesNotExist'
   }
+}
 
-  static fromCode (code) {
-    const codeValue = Number(code)
-    const error = ErrorType.all().find(e => e.code === codeValue)
-    if (error) {
-      return error
-    } else {
-      return ErrorType.UnknownError
-    }
+export class GameCantBeJoinedError extends Error {
+  constructor (gameId) {
+    super(`You already joined game ${gameId}.`)
+    this.code = 1003
+    this.name = 'CantJoinOwnGame'
+  }
+}
+
+export class GameDefaultError extends Error {
+  constructor (message) {
+    super(message)
+    this.code = 2000
+    this.name = 'GenericGameError'
   }
 }
 

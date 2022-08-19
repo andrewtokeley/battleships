@@ -1,4 +1,4 @@
-import { onSnapshot, doc, addDoc, query, collection, where, deleteDoc } from 'firebase/firestore'
+import { onSnapshot, doc, addDoc, query, collection, where, deleteDoc, writeBatch, getDocs } from 'firebase/firestore'
 import { MessageDataConverter } from '../dataEntities/messageData'
 // import { useUserStore } from '../../store/userStore'
 import { db } from './firebase'
@@ -61,4 +61,24 @@ export const attachMessageListener = function (userId, gameId, messageType, hand
 export const deleteMessage = async function (messageId) {
   const ref = doc(db, COLLECTION_ID, messageId)
   await deleteDoc(ref)
+}
+
+/**
+ * Deletes all message for a game
+ * @param {*} gameId
+ */
+export const deleteMessages = function (gameId) {
+  const batch = writeBatch(db)
+
+  // delete from game collection
+  const q = query(
+    collection(db, COLLECTION_ID),
+    where('gameId', '==', gameId))
+
+  return getDocs(q).then(async (querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      batch.delete(doc.ref)
+    })
+    await batch.commit()
+  })
 }

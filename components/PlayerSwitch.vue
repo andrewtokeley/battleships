@@ -115,6 +115,7 @@ div.material-icons.miss {
   color: var(--bs-darkblue);
   height: 40px;
   line-height: 40px;
+  margin: 0px;
 }
 
 .button.active {
