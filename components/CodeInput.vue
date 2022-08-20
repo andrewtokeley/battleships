@@ -1,20 +1,20 @@
 <template>
   <div class="code-input">
     <input
-      v-for="i in [0,1,2,3,4]"
-      :id="i"
+      v-for="i in Array.from(Array(numberOfCharacters).keys())"
+      :id="`char${i}`"
       :key="i"
-      :ref="`char${i}`"
       :disabled="disabled"
       maxlength="1"
       class="character"
-      onFocus="this.select();"
-      onkeydown="return /[a-z]/i.test(event.key)"
       autocomplete="off"
       autocapitalize="on"
       autocorrect="off"
       spellcheck="false"
-      @keyup="handleChange"
+      type="text"
+      placeholder=""
+      @keydown="handleKeyDown"
+      @input="handleInput"
     >
   </div>
 </template>
@@ -40,48 +40,83 @@ export default {
     focusIndex: {
       type: Number,
       default: 0
+    },
+    numberOfCharacters: {
+      type: Number,
+      default: 5
     }
   },
   emits: ['update:modelValue'],
+  data () {
+    return {
+      inputs: []
+    }
+  },
   watch: {
     modelValue () {
-      this.setInputs()
+      this.setInputValues(this.modelValue)
     }
   },
   mounted () {
-    // initialise characters
-    this.setInputs()
+    this.defineInputs()
+
+    // set the inital value of each input, based on modelValue
+    this.setInputValues(this.modelValue)
 
     // set the focus on the first character
-    if (this.focusCharacter >= 0 && this.focusCharacter < 5) {
-      this.$refs.char0[this.focusCharacter].focus()
+    if (this.focusIndex >= 0 && this.focusIndex < 5) {
+      this.inputs[this.focusIndex].focus()
     }
   },
   methods: {
-    setInputs () {
-      this.$refs.char0[0].value = this.modelValue.charAt(0)
-      this.$refs.char1[0].value = this.modelValue.charAt(1)
-      this.$refs.char2[0].value = this.modelValue.charAt(2)
-      this.$refs.char3[0].value = this.modelValue.charAt(3)
-      this.$refs.char4[0].value = this.modelValue.charAt(4)
-    },
-    handleChange (event) {
-      if (event.key.length === 1 && /[a-z]/i.test(event.key)) {
-        const newValue = this.$refs.char0[0].value +
-          this.$refs.char1[0].value +
-          this.$refs.char2[0].value +
-          this.$refs.char3[0].value +
-          this.$refs.char4[0].value
-        this.$emit('update:modelValue', newValue.toUpperCase())
-
-        // set the focus to the next input
-        const index = Number(event.target.id)
-        if (index < 4) {
-          this.$refs[`char${index + 1}`][0].focus()
-        } else {
-          this.$refs.char0[0].focus()
-        }
+    defineInputs () {
+      this.inputs = []
+      for (let i = 0; i < this.numberOfCharacters; i++) {
+        this.inputs.push(document.getElementById(`char${i}`))
       }
+    },
+    setInputValues (value) {
+      for (let i = 0; i < this.numberOfCharacters; i++) {
+        this.inputs[i].value = value.charAt(i).trim()
+      }
+    },
+    handleKeyDown (event) {
+      const i = Number(event.target.id.substring(4))
+      if (event.key === 'Backspace') {
+        if (this.inputs[i].value === '') {
+          if (i !== 0) {
+            this.inputs[i - 1].focus()
+          }
+        } else {
+          this.inputs[i].value = ''
+          this.updateModelValue()
+        }
+      } else if (event.key === 'ArrowLeft' && i !== 0) {
+        this.inputs[i - 1].focus()
+      } else if (event.key === 'ArrowRight' && i !== this.inputs.length - 1) {
+        this.inputs[i + 1].focus()
+      } else if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+        this.inputs[i].setAttribute('type', 'text')
+        // this.inputs[i].value = '' // Bug Fix: allow user to change a random otp digit after pressing it
+      }
+    },
+    handleInput (event) {
+      const i = Number(event.target.id.substring(4))
+      this.inputs[i].value = this.inputs[i].value.toUpperCase() // Converts to Upper case. Remove .toUpperCase() if conversion isnt required.
+      this.updateModelValue()
+      if (i === this.inputs.length - 1 && this.inputs[i].value !== '') {
+        return true
+      } else if (this.inputs[i].value !== '') {
+        this.inputs[i + 1].focus()
+      }
+    },
+    updateModelValue () {
+      let newValue = ''
+      for (let i = 0; i < this.numberOfCharacters; i++) {
+        const char = this.inputs[i].value
+        newValue += (char === '' ? ' ' : char)
+      }
+      this.$emit('update:modelValue', newValue.toUpperCase())
     }
   }
 }
@@ -100,7 +135,6 @@ input {
   height: 50px;
   margin-right: 2px;
   background-color: beige;
-  border: 1px var(--bs-green) solid;
   text-align: center;
   font-size: var(--bs-font-size-large);
   font-family: 'Courier New', Courier, monospace;
@@ -108,10 +142,12 @@ input {
   color: var(--bs-green);
   text-transform: uppercase;
   outline: none;
+  border: 2px solid transparent;
 }
 
 input:focus {
   background-color: #E0E09A;
+  border: var(--bs-blue) 2px solid;
 }
 
 ::-moz-selection { /* Code for Firefox */

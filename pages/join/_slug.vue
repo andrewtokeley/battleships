@@ -5,11 +5,11 @@
     <div class="button-group">
       <div class="code-container">
         <p>
-          Enter battle code Commander
+          Enter battle code
         </p>
-        <code-input v-model="gameId" />
+        <code-input v-model="gameId" :focus-index="canJoin ? -1 : 0" />
       </div>
-      <base-button :disabled="!canJoin" @click.native="handleJoin">
+      <base-button :style="{visibility: canJoin ? 'visible' : 'hidden'}" @click.native="handleJoin">
         JOIN BATTLE
       </base-button>
     </div>
@@ -47,7 +47,7 @@ export default {
   },
   computed: {
     canJoin () {
-      return this.gameId.trim().length === 5
+      return this.gameId.replace(' ', '').length === 5
     },
     gameIdQS () {
       const code = this.$route.params.slug
