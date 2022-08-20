@@ -242,32 +242,11 @@ export default {
     yourName () {
       return this.store.playerName
     },
-    // yourIndicatorColour () {
-    //   const yourMove = this.viewModel.currentPlayerId === this.userId
-    //   if (yourMove) {
-    //     console.log('yourIndicator transparent')
-    //     return 'transparent'
-    //   } else {
-    //     console.log('yourIndicator green')
-    //     return 'green'
-    //   }
-    // },
-    // opponentIndicatorColour () {
-    //   const yourMove = this.viewModel.currentPlayerId === this.userId
-    //   if (yourMove) {
-    //     console.log('opponentIndicator green')
-    //     return 'green'
-    //   } else {
-    //     console.log('opponentIndicator trans')
-    //     return 'transparent'
-    //   }
-    // },
-
     winnerName () {
       if (!this.isGameOver) {
         return null
       }
-      return (this.viewModel.yourHitTotal === this.viewModel.hitsForWin) ? this.yourName : this.viewModel.opponentName
+      return (this.viewModel.yourHitTotal >= this.viewModel.hitsForWin) ? this.yourName : this.viewModel.opponentName
     },
 
     winnerId () {
@@ -278,7 +257,7 @@ export default {
     },
 
     isGameOver () {
-      return this.viewModel.yourHitTotal === this.viewModel.hitsForWin || this.viewModel.opponentHitTotal === this.viewModel.hitsForWin
+      return this.viewModel.yourHitTotal >= this.viewModel.hitsForWin || this.viewModel.opponentHitTotal >= this.viewModel.hitsForWin
     },
 
     yourMove () {
@@ -406,7 +385,7 @@ export default {
     /**
      * Checks for a winner and returns true if there is one, otherwise false
      */
-    checkForWinner () {
+    handleWin () {
       if (this.isGameOver) {
         this.popupMessage = `${this.winnerName} won!`
         this.popupSubMessage = ''
@@ -414,10 +393,7 @@ export default {
 
         // save the winner to the game
         addOrUpdateGameData({ id: this.gameCode, winnerId: this.winnerId })
-
-        return true
       }
-      return false
     },
 
     /**
@@ -686,9 +662,11 @@ export default {
         // update the shot on the board to reflect the shot (hit or not)
         this.viewModel.yourBoard.shots.push(shot)
 
-        if (!this.checkForWinner()) {
+        if (!this.isGameOver) {
           // Hand over your turn to the other player
           this.swapTurns()
+        } else {
+          this.handleWin()
         }
       }
     },
@@ -711,7 +689,8 @@ export default {
 
           if (shot.hit) {
             this.viewModel.yourHitTotal += 1
-            if (this.checkForWinner()) {
+            if (this.isGameOver) {
+              this.handleWin()
               return
             }
             this.popupMessage = 'Hit!'
