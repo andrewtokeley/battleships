@@ -1,17 +1,14 @@
 <template>
   <div class="background">
     <div class="title" />
-
-    <div class="button-group">
-      <div class="code-container">
-        <p v-show="ready">
-          Code sequence initiated
-        </p>
-        <p v-show="!ready">
-          Initialising...
-        </p>
-        <code-input v-model="gameCode" :disabled="true" />
-      </div>
+    <div class="code-container">
+      <p v-show="ready">
+        Code sequence initiated
+      </p>
+      <p v-show="!ready">
+        Initialising...
+      </p>
+      <code-input v-model="gameCode" :disabled="true" />
       <base-button :style="{visibility: ready ? 'visible' : 'hidden'}" @click.native="handlePlay">
         LET'S GO
       </base-button>
@@ -107,12 +104,10 @@ export default {
 }
 
 .title {
-  position: absolute;
+  position: relative;
   width: 90%;
   height: 5%;
-  top: 120px;
-  left: 0px;
-  right: 0px;
+  margin-top: 120px;
   margin-left: auto;
   margin-right: auto;
   background-image: url('~@/assets/battleship_title.png');
@@ -121,31 +116,16 @@ export default {
   background-position: center;
 }
 .code-container {
-  margin-bottom: 20px;
-}
-
-.code-container p {
-  font-weight: var(--bs-font-size-extra-large);
-  text-align: center;
-}
-
-.button-group {
   position: absolute;
+  bottom:100px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  margin-bottom: 100px;
-}
-
-.close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  flex-direction: column;
+  background-color: rgba(80, 91, 55, 0.6);
+  margin: 10px 0px 10px 0px;
+  padding-top: 10px;
+  padding-bottom: 30px;
   color: white;
-  font-size: var(--bs-font-size-large)
+  width: 100%;
 }
 </style>
